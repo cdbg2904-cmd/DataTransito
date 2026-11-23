@@ -1,0 +1,26 @@
+[
+  {
+    "id": "CR5-C14-C15",
+    "nombre": "Carrera 5 entre Calles 14 y 15",
+    "sector": "Centro Histórico",
+    "tipo_via": "arterial",
+    "lat": 11.2421,
+    "lng": -74.2105
+  },
+  {
+    "id": "CR5-C15-C16",
+    "nombre": "Carrera 5 entre Calles 15 y 16",
+    "sector": "Centro Histórico",
+    "tipo_via": "arterial",
+    "lat": 11.2414,
+    "lng": -74.2108
+  },
+  {
+    "id": "C15-CR4-CR5",
+    "nombre": "Calle 15 entre Carreras 4 y 5",
+    "sector": "Centro Histórico",
+    "tipo_via": "secundaria",
+    "lat": 11.2418,
+    "lng": -74.2112
+  }
+]
