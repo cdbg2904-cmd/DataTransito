@@ -14,7 +14,7 @@ Prototipo de aplicación web *mobile-first* diseñada para registrar incidentes 
 El sistema calcula automáticamente un **índice de criticidad** basado en reglas explícitas y visualiza la reincidencia mediante un **mapa de calor** y un **resumen operativo**, permitiendo a los supervisores de movilidad priorizar dónde intervenir.
 
 ### 🔗 Enlaces del Proyecto
-* **Prototipo en vivo (GitHub Pages):** `https://github.com/cdbg2904-cmd/proyecto-intro-grupo5/tree/main`
+* **Prototipo en vivo (GitHub Pages):** `https://github.com/cdbg2904-cmd/DataTransito`
 * **Video de contingencia (Demostración):** `[Enlace a Google Drive / YouTube]`
 
 ---
@@ -70,7 +70,7 @@ Dado que la aplicación carga archivos `.json` locales mediante `fetch()`, los n
 
 1. Clona este repositorio en tu equipo:
    ```bash
-   git clone https://github.com/cdbg2904-cmd/proyecto-intro-grupo5.git
+   git clone https://github.com/cdbg2904-cmd/DataTransito.git
    ```
 2. Abre la carpeta del proyecto en **Visual Studio Code**.
 3. Instala y ejecuta la extensión **Live Server** (clic derecho sobre `index.html` $\rightarrow$ *"Open with Live Server"*).
