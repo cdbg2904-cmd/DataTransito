@@ -3,7 +3,7 @@
 > **Universidad del Magdalena** | Facultad de Ingeniería — Programa de Ingeniería de Sistemas  
 > **Asignatura:** Introducción a la Ingeniería de Sistemas (2026-2)  
 > **Docente:** Aquiles Cohen  
-> **Equipo:** `[Nombre del Equipo]`
+> **Equipo:** `5`
 
 ---
 
@@ -90,4 +90,4 @@ En cumplimiento con la **Ley 1581 de 2012** (Protección de Datos Personales en 
 
 ## 🤖 Declaración de Uso de Inteligencia Artificial
 
-Para el desarrollo de este prototipo se utilizaron herramientas de asistencia basadas en IA (`[Indicar herramientas: ej. ChatGPT, Claude, Gemini, GitHub Copilot]`) como apoyo en la generación de estructura HTML/CSS, configuración de la librería `Leaflet.heat` y depuración de funciones en JavaScript. El proceso de iteración, los errores detectados y sus respectivas correcciones se encuentran documentados en `documentos/bitacora.pdf`.
+Para el desarrollo de este prototipo se utilizaron herramientas de asistencia basadas en IA (`[ChatGPT, Claude, Gemini, GitHub Copilot]`) como apoyo en la generación de estructura HTML/CSS, configuración de la librería `Leaflet.heat` y depuración de funciones en JavaScript. El proceso de iteración, los errores detectados y sus respectivas correcciones se encuentran documentados en `documentos/bitacora.pdf`.
