@@ -139,7 +139,25 @@ body {
 .dot.high { background: var(--red); }
 
 .summary-panel { padding: 22px 20px; }
-.summary-panel > h2 { margin-bottom: 18px; }
+.summary-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 5px 0 18px; }
+.summary-heading h2 { margin: 0; font-size: 20px; letter-spacing: -.03em; }
+.refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--blue-dark);
+  font: 600 12px "Inter", sans-serif;
+  cursor: pointer;
+}
+.refresh-button:hover:not(:disabled) { background: #f1f7f9; }
+.refresh-button:disabled { cursor: wait; opacity: .6; }
+.refresh-button svg { width: 15px; fill: currentColor; }
 .total-card {
   min-height: 96px;
   display: flex;

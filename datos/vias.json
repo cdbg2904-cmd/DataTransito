@@ -4,63 +4,63 @@
     "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 22 y 23",
     "sector": "Entrada Unimagdalena",
     "tipo_via": "arterial",
-    "lat": 11.2268,
-    "lng": -74.1872
+    "lat": 11.222804,
+    "lng": -74.193227
   },
   {
     "id": "CR32-C21-C22",
     "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 21 y 22",
     "sector": "Av. del Ferrocarril",
     "tipo_via": "arterial",
-    "lat": 11.2258,
-    "lng": -74.1868
+    "lat": 11.221880,
+    "lng": -74.192520
   },
   {
     "id": "CR32-C23-C24",
     "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 23 y 24",
     "sector": "Av. del Ferrocarril",
     "tipo_via": "arterial",
-    "lat": 11.2280,
-    "lng": -74.1878
+    "lat": 11.223084,
+    "lng": -74.193455
   },
   {
     "id": "AVLIB-C23-C24",
     "nombre": "Avenida del Libertador entre Calles 23 y 24",
     "sector": "Av. del Libertador",
     "tipo_via": "arterial",
-    "lat": 11.2285,
-    "lng": -74.1847
+    "lat": 11.228540,
+    "lng": -74.174725
   },
   {
     "id": "AVLIB-C24-C25",
     "nombre": "Avenida del Libertador entre Calles 24 y 25",
     "sector": "Av. del Libertador",
     "tipo_via": "arterial",
-    "lat": 11.2291,
-    "lng": -74.1840
+    "lat": 11.229399,
+    "lng": -74.174900
   },
   {
     "id": "C22-CR31-CR32",
     "nombre": "Calle 22 entre Carreras 31 y 32",
     "sector": "San Pedro Alejandrino",
     "tipo_via": "secundaria",
-    "lat": 11.2273,
-    "lng": -74.1861
+    "lat": 11.237942,
+    "lng": -74.175623
   },
   {
     "id": "C22-CR30-CR31",
     "nombre": "Calle 22 entre Carreras 30 y 31",
     "sector": "San Pedro Alejandrino",
     "tipo_via": "secundaria",
-    "lat": 11.2279,
-    "lng": -74.1855
+    "lat": 11.237942,
+    "lng": -74.175623
   },
   {
     "id": "CR33-C21-C22",
     "nombre": "Carrera 33 entre Calles 21 y 22",
     "sector": "Los Alcázares",
     "tipo_via": "secundaria",
-    "lat": 11.2252,
-    "lng": -74.1879
+    "lat": 11.220175,
+    "lng": -74.182027
   }
 ]

@@ -56,7 +56,13 @@
 
     <aside class="summary-panel" aria-label="Resumen de la prueba">
       <span class="eyebrow">Resumen rápido</span>
-      <h2>Registros cargados</h2>
+      <div class="summary-heading">
+        <h2>Registros cargados</h2>
+        <button id="btn-actualizar-datos" class="refresh-button" type="button" aria-label="Actualizar reportes">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.93 9h-2.02A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>
+          <span>Actualizar</span>
+        </button>
+      </div>
 
       <div class="total-card">
         <div>
@@ -100,14 +106,16 @@
       alternarVistaMapa,
       establecerModoOffline,
       estaModoOffline
-    } from "./js/mapa.js?v=offline-simulated-bounds-2";
+    } from "./js/mapa.js?v=zoom-alineado";
 
     const boton = document.getElementById("btn-alternar-capa");
     const textoBoton = boton.querySelector("span");
     const botonOffline = document.getElementById("btn-modo-offline");
     const textoBotonOffline = botonOffline.querySelector("span");
     const estado = document.getElementById("estado-mapa");
+    const botonActualizar = document.getElementById("btn-actualizar-datos");
     let totalReportes = 0;
+    let ultimaActualizacion = null;
     let modoOffline = false;
 
     function actualizarControlesOffline(activo) {
@@ -116,9 +124,14 @@
       textoBotonOffline.textContent = modoOffline
         ? "Volver al mapa en línea"
         : "Probar modo offline";
+      const etiquetaReportes = totalReportes === 1
+        ? "1 reporte cargado"
+        : `${totalReportes} reportes cargados`;
       estado.textContent = modoOffline
         ? "Modo offline simulado: centro aproximado y zoom limitado"
-        : `${totalReportes} reportes cargados`;
+        : totalReportes
+          ? `${etiquetaReportes}${ultimaActualizacion ? ` · actualizado ${ultimaActualizacion}` : ""}`
+          : "Cargando reportes...";
     }
 
     window.addEventListener("mapa:modo-offline", (evento) => {
@@ -128,46 +141,60 @@
     inicializarMapa();
     actualizarControlesOffline(estaModoOffline());
 
-    try {
-      const [respuestaReportes, respuestaVias, respuestaCriterios] = await Promise.all([
-        fetch("datos/reportes.json"),
-        fetch("datos/vias.json"),
-        fetch("datos/criterios.json")
-      ]);
+    async function cargarDatosReportes() {
+      botonActualizar.disabled = true;
+      estado.textContent = "Actualizando reportes...";
 
-      if (!respuestaReportes.ok || !respuestaVias.ok || !respuestaCriterios.ok) {
-        throw new Error("No se pudieron cargar los datos locales");
+      try {
+        const [respuestaReportes, respuestaVias, respuestaCriterios] = await Promise.all([
+          fetch("datos/reportes.json", { cache: "no-store" }),
+          fetch("datos/vias.json", { cache: "no-store" }),
+          fetch("datos/criterios.json", { cache: "no-store" })
+        ]);
+
+        if (!respuestaReportes.ok || !respuestaVias.ok || !respuestaCriterios.ok) {
+          throw new Error(`Error HTTP al cargar los datos (reportes: ${respuestaReportes.status}, vías: ${respuestaVias.status}, criterios: ${respuestaCriterios.status})`);
+        }
+
+        const [reportes, vias, criterios] = await Promise.all([
+          respuestaReportes.json(),
+          respuestaVias.json(),
+          respuestaCriterios.json()
+        ]);
+
+        const reportesProcesados = reportes.map((reporte) => ({
+          ...reporte,
+          criticidad: window.calcularCriticidad
+            ? window.calcularCriticidad(reporte, criterios, vias)
+            : reporte.criticidad
+        }));
+
+        actualizarCapasMapa(reportesProcesados);
+
+        document.getElementById("total-reportes").textContent = reportesProcesados.length;
+        document.getElementById("total-alto").textContent =
+          reportesProcesados.filter((r) => r.criticidad.nivel === "Alto").length;
+        document.getElementById("total-medio").textContent =
+          reportesProcesados.filter((r) => r.criticidad.nivel === "Medio").length;
+        document.getElementById("total-bajo").textContent =
+          reportesProcesados.filter((r) => r.criticidad.nivel === "Bajo").length;
+
+        totalReportes = reportesProcesados.length;
+        ultimaActualizacion = new Date().toLocaleTimeString("es-CO", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        actualizarControlesOffline(estaModoOffline());
+      } catch (error) {
+        console.error("No se pudieron actualizar los reportes:", error);
+        estado.textContent = "No se pudieron cargar los datos; revisa la conexión o el JSON";
+      } finally {
+        botonActualizar.disabled = false;
       }
-
-      const [reportes, vias, criterios] = await Promise.all([
-        respuestaReportes.json(),
-        respuestaVias.json(),
-        respuestaCriterios.json()
-      ]);
-
-      const reportesProcesados = reportes.map((reporte) => ({
-        ...reporte,
-        criticidad: window.calcularCriticidad
-          ? window.calcularCriticidad(reporte, criterios, vias)
-          : reporte.criticidad
-      }));
-
-      actualizarCapasMapa(reportesProcesados);
-
-      document.getElementById("total-reportes").textContent = reportesProcesados.length;
-      document.getElementById("total-alto").textContent =
-        reportesProcesados.filter((r) => r.criticidad.nivel === "Alto").length;
-      document.getElementById("total-medio").textContent =
-        reportesProcesados.filter((r) => r.criticidad.nivel === "Medio").length;
-      document.getElementById("total-bajo").textContent =
-        reportesProcesados.filter((r) => r.criticidad.nivel === "Bajo").length;
-
-      totalReportes = reportesProcesados.length;
-      actualizarControlesOffline(estaModoOffline());
-    } catch (error) {
-      console.error(error);
-      estado.textContent = "No se pudieron cargar los datos";
     }
+
+    botonActualizar.addEventListener("click", cargarDatosReportes);
+    await cargarDatosReportes();
 
     boton.addEventListener("click", () => {
       const mostrandoCalor = alternarVistaMapa();

@@ -7,15 +7,25 @@ let controlZoom;
 let mostrandoCalor = true;
 let modoOffline = false;
 
-const CENTRO_SANTA_MARTA = [11.2425, -74.2110];
-const CENTRO_REPORTES_SIMULADO = [11.24345, -74.21135];
+const CENTRO_UNIVERSIDAD = [11.2233, -74.1865];
 const LIMITES_MAPA_OFFLINE = [
-  [11.24025, -74.21755],
-  [11.24665, -74.20515]
+  [11.2131, -74.2246],
+  [11.2374, -74.1781]
 ];
+const ZOOM_INICIAL = 15.5;
+const ZOOM_EN_LINEA = ZOOM_INICIAL + 1;
 const ZOOM_OUT_MAXIMO_OFFLINE = 0.3;
 const ZOOM_IN_MAXIMO_OFFLINE = 2.5;
-let zoomInicial;
+const RADIO_CALOR = 28;
+const DIFUMINADO_CALOR = 18;
+
+function opcionesCalorSegunModo() {
+  const escala = modoOffline ? 0.5 : 1;
+  return {
+    radius: RADIO_CALOR * escala,
+    blur: DIFUMINADO_CALOR * escala
+  };
+}
 
 /**
  * Inicializa el mapa base con OpenStreetMap o respaldo offline
@@ -28,12 +38,11 @@ export function inicializarMapa() {
   });
   controlZoom = L.control.zoom().addTo(mapa);
 
-  capaOffline = L.imageOverlay('datos/mapa-offline.png?v=offline-4', LIMITES_MAPA_OFFLINE);
+  capaOffline = L.imageOverlay('datos/mapa-offline.png?v=university-center', LIMITES_MAPA_OFFLINE);
   capaOffline.on('error', (evento) => {
     console.error('No se pudo cargar datos/mapa-offline.png', evento);
   });
-  zoomInicial = mapa.getBoundsZoom(capaOffline.getBounds(), true) + ZOOM_OUT_MAXIMO_OFFLINE;
-  mapa.setView(CENTRO_REPORTES_SIMULADO, zoomInicial);
+  mapa.setView(CENTRO_UNIVERSIDAD, ZOOM_EN_LINEA);
 
   capaOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -60,19 +69,20 @@ export function establecerModoOffline(activar) {
     if (mapa.hasLayer(capaOSM)) mapa.removeLayer(capaOSM);
     capaOffline.addTo(mapa);
     mapa.setMaxBounds(capaOffline.getBounds());
-    mapa.setMinZoom(zoomInicial - ZOOM_OUT_MAXIMO_OFFLINE);
-    mapa.setMaxZoom(zoomInicial + ZOOM_IN_MAXIMO_OFFLINE);
-    mapa.setView(CENTRO_REPORTES_SIMULADO, zoomInicial, { animate: false });
+    mapa.setMinZoom(ZOOM_INICIAL - ZOOM_OUT_MAXIMO_OFFLINE);
+    mapa.setMaxZoom(ZOOM_INICIAL + ZOOM_IN_MAXIMO_OFFLINE);
+    mapa.setView(CENTRO_UNIVERSIDAD, ZOOM_EN_LINEA, { animate: false });
   } else {
     if (capaOffline && mapa.hasLayer(capaOffline)) mapa.removeLayer(capaOffline);
     capaOSM.addTo(mapa);
     mapa.setMaxBounds(null);
     mapa.setMinZoom(0);
     mapa.setMaxZoom(19);
-    mapa.setView(CENTRO_REPORTES_SIMULADO, zoomInicial, { animate: false });
+    mapa.setView(CENTRO_UNIVERSIDAD, ZOOM_INICIAL, { animate: false });
   }
 
   modoOffline = activar;
+  if (capaCalor) capaCalor.setOptions(opcionesCalorSegunModo());
   window.dispatchEvent(new CustomEvent('mapa:modo-offline', {
     detail: { activo: modoOffline }
   }));
@@ -100,8 +110,7 @@ export function actualizarCapasMapa(reportes) {
   ]);
 
   capaCalor = L.heatLayer(puntosCalor, {
-    radius: 28,
-    blur: 18,
+    ...opcionesCalorSegunModo(),
     maxZoom: 17,
     gradient: { 0.4: 'blue', 0.65: 'lime', 0.8: 'orange', 1.0: 'red' }
   });
@@ -145,6 +154,7 @@ export function alternarVistaMapa() {
   mostrandoCalor = !mostrandoCalor;
   if (mostrandoCalor) {
     mapa.removeLayer(capaPuntos);
+    if (capaCalor) capaCalor.setOptions(opcionesCalorSegunModo());
     if (capaCalor) capaCalor.addTo(mapa);
   } else {
     if (capaCalor) mapa.removeLayer(capaCalor);
