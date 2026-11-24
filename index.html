@@ -96,6 +96,65 @@
     </aside>
   </main>
 
+  <section class="report-form-panel" aria-labelledby="titulo-formulario">
+    <div class="report-form-heading">
+      <div>
+        <span class="eyebrow">Participación ciudadana</span>
+        <h2 id="titulo-formulario">Reporta un incidente</h2>
+        <p>Elige cuatro opciones y adjunta una foto; toma menos de 30 segundos. No pedimos datos personales.</p>
+      </div>
+      <span class="quick-report-badge">Menos de 30 s</span>
+    </div>
+    <form id="formulario-reporte" class="report-form">
+      <label>
+        <span>¿Qué ocurrió?</span>
+        <select id="reporte-categoria" name="categoria" required disabled>
+          <option value="">Selecciona el incidente</option>
+          <option value="doble_fila">Vehículo en doble fila</option>
+          <option value="bloqueo_rampa_cebra_paradero">Bloqueo de rampa, cebra o paradero</option>
+          <option value="invasion_anden">Invasión del andén</option>
+        </select>
+      </label>
+      <label>
+        <span>¿En qué cuadra?</span>
+        <select id="reporte-cuadra" name="cuadra" required disabled>
+          <option value="">Selecciona la ubicación</option>
+        </select>
+      </label>
+      <label>
+        <span>¿Qué actor está involucrado?</span>
+        <select id="reporte-actor" name="actor" required disabled>
+          <option value="">Selecciona el actor</option>
+          <option value="vehiculo_particular">Vehículo particular</option>
+          <option value="vehiculo_carga">Vehículo de carga</option>
+          <option value="motocicleta">Motocicleta</option>
+          <option value="mobiliario_comercial">Mobiliario comercial</option>
+        </select>
+      </label>
+      <label class="photo-upload-field">
+        <span>Adjunta una foto de evidencia <strong>(obligatoria)</strong></span>
+        <input
+          id="reporte-foto"
+          name="foto"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          aria-describedby="ayuda-foto"
+          required
+          disabled
+        >
+        <small id="ayuda-foto">Se reduce automáticamente; máximo 10 MB antes de comprimir.</small>
+      </label>
+      <button id="btn-enviar-reporte" class="submit-report-button" type="submit" disabled>
+        Enviar reporte
+      </button>
+    </form>
+    <p id="estado-formulario" class="form-status" role="status" aria-live="polite">
+      Cargando ubicaciones...
+    </p>
+    <p class="form-storage-note">Este prototipo guarda tus reportes en este navegador; no se envían a un servidor.</p>
+  </section>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <script src="js/criticidad.js"></script>
@@ -106,7 +165,7 @@
       alternarVistaMapa,
       establecerModoOffline,
       estaModoOffline
-    } from "./js/mapa.js?v=zoom-alineado";
+    } from "./js/mapa.js?v=formulario-evidencia";
 
     const boton = document.getElementById("btn-alternar-capa");
     const textoBoton = boton.querySelector("span");
@@ -114,9 +173,123 @@
     const textoBotonOffline = botonOffline.querySelector("span");
     const estado = document.getElementById("estado-mapa");
     const botonActualizar = document.getElementById("btn-actualizar-datos");
+    const formularioReporte = document.getElementById("formulario-reporte");
+    const selectorCuadra = document.getElementById("reporte-cuadra");
+    const selectorFoto = document.getElementById("reporte-foto");
+    const estadoFormulario = document.getElementById("estado-formulario");
+    const botonEnviarReporte = document.getElementById("btn-enviar-reporte");
+    const CLAVE_REPORTES_COMUNIDAD = "control-vial-reportes-comunidad-v1";
     let totalReportes = 0;
     let ultimaActualizacion = null;
     let modoOffline = false;
+    let reportesBase = [];
+    let reportesComunidad = [];
+    let viasDisponibles = [];
+    let criteriosDisponibles = null;
+
+    function leerReportesComunidad() {
+      const datosGuardados = localStorage.getItem(CLAVE_REPORTES_COMUNIDAD);
+      if (!datosGuardados) return [];
+
+      const reportesGuardados = JSON.parse(datosGuardados);
+      if (!Array.isArray(reportesGuardados)) {
+        throw new Error("Los reportes guardados en este navegador tienen un formato inválido.");
+      }
+      return reportesGuardados;
+    }
+
+    function guardarReportesComunidad(reportes) {
+      localStorage.setItem(CLAVE_REPORTES_COMUNIDAD, JSON.stringify(reportes));
+    }
+
+    function procesarReportes(reportes) {
+      return reportes.map((reporte) => ({
+        ...reporte,
+        criticidad: window.calcularCriticidad
+          ? window.calcularCriticidad(reporte, criteriosDisponibles, viasDisponibles)
+          : reporte.criticidad
+      }));
+    }
+
+    function actualizarResumenReportes(reportesProcesados) {
+      actualizarCapasMapa(reportesProcesados);
+      document.getElementById("total-reportes").textContent = reportesProcesados.length;
+      document.getElementById("total-alto").textContent =
+        reportesProcesados.filter((reporte) => reporte.criticidad.nivel === "Alto").length;
+      document.getElementById("total-medio").textContent =
+        reportesProcesados.filter((reporte) => reporte.criticidad.nivel === "Medio").length;
+      document.getElementById("total-bajo").textContent =
+        reportesProcesados.filter((reporte) => reporte.criticidad.nivel === "Bajo").length;
+      totalReportes = reportesProcesados.length;
+    }
+
+    function poblarSelectorCuadras(vias) {
+      selectorCuadra.replaceChildren(new Option("Selecciona la ubicación", ""));
+      vias.forEach((via) => {
+        const opcion = document.createElement("option");
+        opcion.value = via.id;
+        opcion.textContent = via.nombre;
+        selectorCuadra.append(opcion);
+      });
+    }
+
+    function crearIdReporte(reportes) {
+      let id;
+      do {
+        id = `WEB-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      } while (reportes.some((reporte) => reporte.id === id));
+      return id;
+    }
+
+    function comprimirFoto(file) {
+      if (!file || !file.type.startsWith("image/")) {
+        return Promise.reject(new Error("Adjunta una imagen para enviar el reporte."));
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        return Promise.reject(new Error("La foto debe pesar menos de 10 MB."));
+      }
+
+      return createImageBitmap(file).then(async (imagen) => {
+        try {
+          const escalaInicial = Math.min(1, 800 / Math.max(imagen.width, imagen.height));
+          let ancho = Math.max(1, Math.round(imagen.width * escalaInicial));
+          let alto = Math.max(1, Math.round(imagen.height * escalaInicial));
+          const lienzo = document.createElement("canvas");
+          const contexto = lienzo.getContext("2d");
+          if (!contexto) throw new Error("No se pudo preparar la imagen en este navegador.");
+
+          for (let intento = 0; intento < 6; intento += 1) {
+            lienzo.width = ancho;
+            lienzo.height = alto;
+            contexto.drawImage(imagen, 0, 0, ancho, alto);
+            const calidad = Math.max(0.42, 0.76 - intento * 0.08);
+            const imagenComprimida = await new Promise((resolve) => {
+              lienzo.toBlob(resolve, "image/jpeg", calidad);
+            });
+            if (!imagenComprimida) {
+              throw new Error("No se pudo comprimir la foto. Prueba con otra imagen.");
+            }
+            if (imagenComprimida.size <= 500 * 1024) {
+              return await new Promise((resolve, reject) => {
+                const lector = new FileReader();
+                lector.onload = () => resolve(lector.result);
+                lector.onerror = () => reject(new Error("No se pudo leer la foto comprimida."));
+                lector.readAsDataURL(imagenComprimida);
+              });
+            }
+            ancho = Math.max(1, Math.round(ancho * 0.8));
+            alto = Math.max(1, Math.round(alto * 0.8));
+          }
+
+          throw new Error("La foto sigue siendo muy pesada al comprimirla. Elige otra imagen.");
+        } finally {
+          imagen.close();
+        }
+      }).catch((error) => {
+        if (error instanceof Error && error.message) throw error;
+        throw new Error("No se pudo abrir la foto. Elige otra imagen.");
+      });
+    }
 
     function actualizarControlesOffline(activo) {
       modoOffline = activo;
@@ -162,24 +335,24 @@
           respuestaCriterios.json()
         ]);
 
-        const reportesProcesados = reportes.map((reporte) => ({
-          ...reporte,
-          criticidad: window.calcularCriticidad
-            ? window.calcularCriticidad(reporte, criterios, vias)
-            : reporte.criticidad
-        }));
+        reportesBase = reportes;
+        viasDisponibles = vias;
+        criteriosDisponibles = criterios;
+        reportesComunidad = leerReportesComunidad();
+        poblarSelectorCuadras(viasDisponibles);
+        formularioReporte.reset();
+        formularioReporte.querySelectorAll("select, input[type='file']").forEach((control) => {
+          control.disabled = false;
+        });
+        botonEnviarReporte.disabled = false;
+        estadoFormulario.textContent = "Elige las opciones y envía tu reporte.";
 
-        actualizarCapasMapa(reportesProcesados);
+        const reportesProcesados = procesarReportes([
+          ...reportesBase,
+          ...reportesComunidad
+        ]);
+        actualizarResumenReportes(reportesProcesados);
 
-        document.getElementById("total-reportes").textContent = reportesProcesados.length;
-        document.getElementById("total-alto").textContent =
-          reportesProcesados.filter((r) => r.criticidad.nivel === "Alto").length;
-        document.getElementById("total-medio").textContent =
-          reportesProcesados.filter((r) => r.criticidad.nivel === "Medio").length;
-        document.getElementById("total-bajo").textContent =
-          reportesProcesados.filter((r) => r.criticidad.nivel === "Bajo").length;
-
-        totalReportes = reportesProcesados.length;
         ultimaActualizacion = new Date().toLocaleTimeString("es-CO", {
           hour: "2-digit",
           minute: "2-digit"
@@ -188,10 +361,73 @@
       } catch (error) {
         console.error("No se pudieron actualizar los reportes:", error);
         estado.textContent = "No se pudieron cargar los datos; revisa la conexión o el JSON";
+        estadoFormulario.textContent =
+          `No se pudieron cargar las ubicaciones: ${error.message}`;
       } finally {
         botonActualizar.disabled = false;
       }
     }
+
+    formularioReporte.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      if (!formularioReporte.reportValidity()) return;
+
+      botonEnviarReporte.disabled = true;
+      try {
+        const datosFormulario = new FormData(formularioReporte);
+        estadoFormulario.textContent = "Comprimiendo foto y guardando reporte...";
+        const cuadra = viasDisponibles.find((via) => via.id === datosFormulario.get("cuadra"));
+        if (!cuadra) {
+          throw new Error("La ubicación seleccionada no está disponible. Actualiza los datos e inténtalo de nuevo.");
+        }
+        const foto = await comprimirFoto(datosFormulario.get("foto"));
+
+        const fechaHora = new Date();
+        const fechaLocal = new Date(
+          fechaHora.getTime() - fechaHora.getTimezoneOffset() * 60000
+        ).toISOString().slice(0, 16);
+        const reporte = {
+          id: crearIdReporte([...reportesBase, ...reportesComunidad]),
+          origen: "comunidad",
+          fecha_hora: fechaLocal,
+          lat: cuadra.lat,
+          lng: cuadra.lng,
+          cuadra: cuadra.id,
+          categoria: datosFormulario.get("categoria"),
+          actor: datosFormulario.get("actor"),
+          foto
+        };
+        reporte.criticidad = window.calcularCriticidad(
+          reporte,
+          criteriosDisponibles,
+          viasDisponibles
+        );
+
+        const reportesComunidadActualizados = [...reportesComunidad, reporte];
+        guardarReportesComunidad(reportesComunidadActualizados);
+        reportesComunidad = reportesComunidadActualizados;
+        actualizarResumenReportes(procesarReportes([
+          ...reportesBase,
+          ...reportesComunidad
+        ]));
+        ultimaActualizacion = new Date().toLocaleTimeString("es-CO", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        actualizarControlesOffline(estaModoOffline());
+        formularioReporte.reset();
+        estadoFormulario.textContent =
+          `Reporte ${reporte.id} agregado al mapa y guardado en este navegador.`;
+      } catch (error) {
+        console.error("No se pudo guardar el reporte:", error);
+        estadoFormulario.textContent =
+          error instanceof DOMException && error.name === "QuotaExceededError"
+            ? "No hay espacio disponible para guardar el reporte en este navegador."
+            : `No se pudo guardar el reporte: ${error.message}`;
+      } finally {
+        botonEnviarReporte.disabled = false;
+      }
+    });
 
     botonActualizar.addEventListener("click", cargarDatosReportes);
     await cargarDatosReportes();

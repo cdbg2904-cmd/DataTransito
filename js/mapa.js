@@ -27,6 +27,44 @@ function opcionesCalorSegunModo() {
   };
 }
 
+function escaparHTML(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, caracter => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[caracter]);
+}
+
+function nivelMasAlto(reportes) {
+  const prioridad = { Alto: 3, Medio: 2, Bajo: 1 };
+  return reportes.reduce((nivelActual, reporte) => {
+    const nivel = reporte.criticidad?.nivel;
+    return (prioridad[nivel] || 0) > (prioridad[nivelActual] || 0)
+      ? nivel
+      : nivelActual;
+  }, 'Bajo');
+}
+
+function crearContenidoPopup(reportes) {
+  const cuadra = escaparHTML(reportes[0].cuadra);
+  const items = reportes.map(reporte => `
+    <li>
+      <strong>${escaparHTML(reporte.id)}</strong> — ${escaparHTML(reporte.categoria)}<br>
+      Actor: ${escaparHTML(reporte.actor)}<br>
+      Criticidad: ${escaparHTML(reporte.criticidad?.nivel)} (${escaparHTML(reporte.criticidad?.puntaje)} pts)
+      ${reporte.foto ? `<br><img src="${escaparHTML(reporte.foto)}" alt="Evidencia de ${escaparHTML(reporte.id)}" style="width:140px; margin-top:6px; border-radius:4px;">` : ''}
+    </li>
+  `).join('');
+
+  return `
+    <strong>${reportes.length} ${reportes.length === 1 ? 'reporte' : 'reportes'}</strong>
+    <span> en ${cuadra}</span>
+    <ul class="lista-reportes-agrupados">${items}</ul>
+  `;
+}
+
 /**
  * Inicializa el mapa base con OpenStreetMap o respaldo offline
  */
@@ -82,7 +120,9 @@ export function establecerModoOffline(activar) {
   }
 
   modoOffline = activar;
-  if (capaCalor) capaCalor.setOptions(opcionesCalorSegunModo());
+  if (capaCalor && mapa.hasLayer(capaCalor)) {
+    capaCalor.setOptions(opcionesCalorSegunModo());
+  }
   window.dispatchEvent(new CustomEvent('mapa:modo-offline', {
     detail: { activo: modoOffline }
   }));
@@ -115,27 +155,29 @@ export function actualizarCapasMapa(reportes) {
     gradient: { 0.4: 'blue', 0.65: 'lime', 0.8: 'orange', 1.0: 'red' }
   });
 
-  // 2. Preparar marcadores individuales con popup informativo
-  reportes.forEach(rep => {
-    const color = rep.criticidad?.nivel === 'Alto' ? '#d32f2f'
-                : rep.criticidad?.nivel === 'Medio' ? '#f57c00' : '#388e3c';
+  // Agrupar reportes en la misma coordenada para que todos queden visibles.
+  const gruposPorCoordenada = new Map();
+  reportes.forEach(reporte => {
+    const clave = `${reporte.lat},${reporte.lng}`;
+    const grupo = gruposPorCoordenada.get(clave) || [];
+    grupo.push(reporte);
+    gruposPorCoordenada.set(clave, grupo);
+  });
 
-    const marcador = L.circleMarker([rep.lat, rep.lng], {
-      radius: 8,
-      fillColor: color,
-      color: '#fff',
-      weight: 2,
-      fillOpacity: 0.9
+  gruposPorCoordenada.forEach(grupo => {
+    const nivel = nivelMasAlto(grupo).toLowerCase();
+    const cantidad = grupo.length;
+    const marcador = L.marker([grupo[0].lat, grupo[0].lng], {
+      title: `${cantidad} ${cantidad === 1 ? 'reporte' : 'reportes'} en ${grupo[0].cuadra}`,
+      icon: L.divIcon({
+        className: 'icono-contador-leaflet',
+        html: `<span class="marcador-contador criticidad-${nivel}">${cantidad}</span>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      })
     });
 
-    marcador.bindPopup(`
-      <strong>Cuadra:</strong> ${rep.cuadra}<br>
-      <strong>Categoría:</strong> ${rep.categoria}<br>
-      <strong>Actor:</strong> ${rep.actor}<br>
-      <strong>Criticidad:</strong> ${rep.criticidad?.nivel} (${rep.criticidad?.puntaje} pts)<br>
-      ${rep.foto ? `<img src="${rep.foto}" alt="Evidencia" style="width:140px; margin-top:6px; border-radius:4px;">` : ''}
-    `);
-
+    marcador.bindPopup(crearContenidoPopup(grupo), { maxWidth: 320 });
     marcador.addTo(capaPuntos);
   });
 
@@ -154,8 +196,10 @@ export function alternarVistaMapa() {
   mostrandoCalor = !mostrandoCalor;
   if (mostrandoCalor) {
     mapa.removeLayer(capaPuntos);
-    if (capaCalor) capaCalor.setOptions(opcionesCalorSegunModo());
-    if (capaCalor) capaCalor.addTo(mapa);
+    if (capaCalor) {
+      capaCalor.addTo(mapa);
+      capaCalor.setOptions(opcionesCalorSegunModo());
+    }
   } else {
     if (capaCalor) mapa.removeLayer(capaCalor);
     capaPuntos.addTo(mapa);
