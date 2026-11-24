@@ -41,13 +41,14 @@
 ### Verificación del cálculo (RF-02 — dos casos a mano)
 El motor reproduce exactamente los puntajes guardados en `reportes.json`:
 
-| Reporte | Categoría | Vía | Franja | Suma | Nivel | Guardado |
-| :------ | :-------- | :-- | :----- | :--- | :---- | :------- |
-| MP-001  | invasión andén (2) | arterial (3) | pico (3) — 12:15 ∈ 11:30–14:00 | **8** | **Alto** | 8 / Alto ✅ |
-| MP-002  | doble fila (3)     | secundaria (1) | valle (1) — 09:40 ∉ horas pico | **5** | **Medio** | 5 / Medio ✅ |
+| Reporte | Cuadra | Categoría | Vía | Franja | Suma | Nivel | Guardado |
+| :------ | :----- | :-------- | :-- | :----- | :--- | :---- | :------- |
+| MP-001  | CR32-C22-C23 | invasión andén (2) | arterial (3) | pico (3) — 12:15 ∈ 11:30–14:00 | **8** | **Alto** | 8 / Alto ✅ |
+| MP-011  | C22-CR31-CR32 | doble fila (3) | secundaria (1) | valle (1) — 09:40 ∉ horas pico | **5** | **Medio** | 5 / Medio ✅ |
 
 > Estos son los **dos casos calculados a mano** que se presentan al jurado.
-> Coinciden además con el ejemplo del enunciado (MP-014 = 2+3+3 = 8, Alto).
+> El mecanismo coincide con el ejemplo del enunciado (invasión + arterial + pico
+> = 2+3+3 = 8, Alto).
 
 ### Decisiones y justificación de las reglas de criticidad
 Pesos definidos en `datos/criterios.json` (se guardan en el JSON y **no** en el
@@ -107,9 +108,10 @@ Se evalúan por prioridad y cada recomendación muestra la regla que la produjo:
 
 > ⚠️ **IMPORTANTE:** los datos actuales de `datos/vias.json` (8 cuadras) y
 > `datos/reportes.json` (30 registros) son **sintéticos, solo para probar la
-> lógica**. Deben reemplazarse por los **datos reales de campo** que entregue el
-> **Analista de Campo**. El motor ya está listo; al cambiar los datos no hay que
-> tocar el código.
+> lógica**. Están **ubicados alrededor de la Universidad del Magdalena** (Cra 32 /
+> Av. del Ferrocarril, sector San Pedro Alejandrino, ≈ 11.226, -74.187). Deben
+> reemplazarse por los **datos reales de campo** que entregue el **Analista de
+> Campo**. El motor ya está listo; al cambiar los datos no hay que tocar el código.
 
 ### Cómo están diseñados
 Los 30 reportes de prueba están armados para que se **dispare cada regla** de
@@ -118,14 +120,14 @@ recomendación y se vea un Top 5 claro. Puntajes calculados a mano con
 
 | # | Cuadra | Puntaje acumulado | Regla que aplica | Recomendación |
 | :- | :----- | :---------------- | :--------------- | :------------ |
-| 1 | CR5-C14-C15 (arterial) | **42** | R1 (4 Alto en hora pico) | Patrullaje prioritario en hora pico |
-| 2 | CR3-C11-C12 (Mercado, secundaria) | **27** | R2 (predomina invasión de andén) | Operativo de espacio público |
-| 3 | CL22-CR3-CR4 (Campo Serrano) | **25** | R3 (predomina vehículo de carga) | Revisar horario de cargue y descargue |
-| 4 | CR5-C15-C16 (arterial) | **24** | R0 | Monitoreo regular |
-| 5 | CR4-C13-C14 (arterial) | **24** | R0 | Monitoreo regular |
+| 1 | CR32-C22-C23 — Entrada Unimagdalena (arterial) | **42** | R1 (4 Alto en hora pico) | Patrullaje prioritario en hora pico |
+| 2 | CR33-C21-C22 — Los Alcázares (secundaria) | **27** | R2 (predomina invasión de andén) | Operativo de espacio público |
+| 3 | AVLIB-C23-C24 — Av. del Libertador (arterial) | **25** | R3 (predomina vehículo de carga) | Revisar horario de cargue y descargue |
+| 4 | CR32-C21-C22 — Av. del Ferrocarril (arterial) | **24** | R0 | Monitoreo regular |
+| 5 | CR32-C23-C24 — Av. del Ferrocarril (arterial) | **24** | R0 | Monitoreo regular |
 
-> Otras cuadras fuera del Top 5: CL22-CR4-CR5 (24, R0), C16-CR3-CR4 (22, R2),
-> C15-CR4-CR5 (20, R0).
+> Otras cuadras fuera del Top 5: AVLIB-C24-C25 (24, R0), C22-CR30-CR31 (22, R2),
+> C22-CR31-CR32 (20, R0).
 
 ### Cómo reemplazar por los datos reales
 1. Pedir al Analista el `vias.json` real (6–10 cuadras clasificadas) y el
@@ -140,8 +142,8 @@ recomendación y se vea un Top 5 claro. Puntajes calculados a mano con
   (`3+1+3=7/Alto`, secundaria en pico) y comparar con el sistema.
 - **RF-04:** filtrar `categoria=invasion_anden` + `franja=valle` y contar a mano.
 - **RF-05:** subir en `criterios.json` el peso de `invasion_anden` de 2 a 4 y
-  mostrar cómo CR3-C11-C12 sube en el ranking (demuestra que las reglas viven en
-  el JSON, no en el código).
+  mostrar cómo CR33-C21-C22 (Los Alcázares) sube en el ranking (demuestra que las
+  reglas viven en el JSON, no en el código).
 
 ---
 
