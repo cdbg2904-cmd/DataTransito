@@ -23,10 +23,10 @@ El sistema calcula automáticamente un **índice de criticidad** basado en regla
 
 | Integrante | Usuario GitHub | Rol en el Equipo | Responsabilidad Principal |
 | :--- | :--- | :--- | :--- |
-| `[Nombre Integrante 1]` | `[@david-art-dev]` | Analista de Campo y Privacidad | Clasificación de cuadras, levantamiento de 30 registros y anonimización de fotos (`vias.json`, `reportes.json`). |
-| `[Nombre Integrante 2]` | `[@sebastiancm2007]` | Ingeniero de Lógica y Clasificación | Reglas del índice de criticidad, filtros y recomendaciones (`criterios.json`, `criticidad.js`, `filtros.js`, `resumen.js`). |
-| `[Nombre Integrante 3]` | `[cdbg2904-cmd]` | Integrador de Mapa e IA | Mapa base, capa de calor (`Leaflet.heat`), marcadores y control de *prompts* (`mapa.js`). |
-| `[Nombre Integrante 4]` | `[@melon2205]` | Diseñador de Interfaz y Documentador | Formulario móvil (< 30s), compresión de fotos, tablero y documentación (`index.html`, `captura.js`). |
+| `[Luis David Maldonado Robles]` | `[@david-art-dev]` | Analista de Campo y Privacidad | Clasificación de cuadras, levantamiento de 30 registros y anonimización de fotos (`vias.json`, `reportes.json`). |
+| `[Sebastián Castrillón Marín]` | `[@sebastiancm2007]` | Ingeniero de Lógica y Clasificación | Reglas del índice de criticidad, filtros y recomendaciones (`criterios.json`, `criticidad.js`, `filtros.js`, `resumen.js`). |
+| `[Carlos David Beltrán Granados]` | `[cdbg2904-cmd]` | Integrador de Mapa e IA | Mapa base, capa de calor (`Leaflet.heat`), marcadores y control de *prompts* (`mapa.js`). |
+| `[Melany Andrea Caceres Madera]` | `[@melon2205]` | Diseñador de Interfaz y Documentador | Formulario móvil (< 30s), compresión de fotos, tablero y documentación (`index.html`, `captura.js`). |
 
 ---
 
