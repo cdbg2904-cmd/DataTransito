@@ -1,66 +1,66 @@
 [
   {
-    "id": "CR5-C14-C15",
-    "nombre": "Carrera 5 entre Calles 14 y 15",
-    "sector": "Centro Histórico",
+    "id": "CR32-C22-C23",
+    "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 22 y 23",
+    "sector": "Entrada Unimagdalena",
     "tipo_via": "arterial",
-    "lat": 11.2421,
-    "lng": -74.2105
+    "lat": 11.2268,
+    "lng": -74.1872
   },
   {
-    "id": "CR5-C15-C16",
-    "nombre": "Carrera 5 entre Calles 15 y 16",
-    "sector": "Centro Histórico",
+    "id": "CR32-C21-C22",
+    "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 21 y 22",
+    "sector": "Av. del Ferrocarril",
     "tipo_via": "arterial",
-    "lat": 11.2414,
-    "lng": -74.2108
+    "lat": 11.2258,
+    "lng": -74.1868
   },
   {
-    "id": "CR4-C13-C14",
-    "nombre": "Carrera 4 entre Calles 13 y 14",
-    "sector": "Centro Histórico",
+    "id": "CR32-C23-C24",
+    "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 23 y 24",
+    "sector": "Av. del Ferrocarril",
     "tipo_via": "arterial",
-    "lat": 11.2430,
-    "lng": -74.2115
+    "lat": 11.2280,
+    "lng": -74.1878
   },
   {
-    "id": "C15-CR4-CR5",
-    "nombre": "Calle 15 entre Carreras 4 y 5",
-    "sector": "Centro Histórico",
+    "id": "AVLIB-C23-C24",
+    "nombre": "Avenida del Libertador entre Calles 23 y 24",
+    "sector": "Av. del Libertador",
+    "tipo_via": "arterial",
+    "lat": 11.2285,
+    "lng": -74.1847
+  },
+  {
+    "id": "AVLIB-C24-C25",
+    "nombre": "Avenida del Libertador entre Calles 24 y 25",
+    "sector": "Av. del Libertador",
+    "tipo_via": "arterial",
+    "lat": 11.2291,
+    "lng": -74.1840
+  },
+  {
+    "id": "C22-CR31-CR32",
+    "nombre": "Calle 22 entre Carreras 31 y 32",
+    "sector": "San Pedro Alejandrino",
     "tipo_via": "secundaria",
-    "lat": 11.2418,
-    "lng": -74.2112
+    "lat": 11.2273,
+    "lng": -74.1861
   },
   {
-    "id": "C16-CR3-CR4",
-    "nombre": "Calle 16 entre Carreras 3 y 4",
-    "sector": "Centro Histórico",
+    "id": "C22-CR30-CR31",
+    "nombre": "Calle 22 entre Carreras 30 y 31",
+    "sector": "San Pedro Alejandrino",
     "tipo_via": "secundaria",
-    "lat": 11.2409,
-    "lng": -74.2120
+    "lat": 11.2279,
+    "lng": -74.1855
   },
   {
-    "id": "CL22-CR3-CR4",
-    "nombre": "Calle 22 (Av. Campo Serrano) entre Carreras 3 y 4",
-    "sector": "Av. Campo Serrano",
-    "tipo_via": "arterial",
-    "lat": 11.2445,
-    "lng": -74.2098
-  },
-  {
-    "id": "CL22-CR4-CR5",
-    "nombre": "Calle 22 (Av. Campo Serrano) entre Carreras 4 y 5",
-    "sector": "Av. Campo Serrano",
-    "tipo_via": "arterial",
-    "lat": 11.2440,
-    "lng": -74.2092
-  },
-  {
-    "id": "CR3-C11-C12",
-    "nombre": "Carrera 3 entre Calles 11 y 12",
-    "sector": "Mercado Público",
+    "id": "CR33-C21-C22",
+    "nombre": "Carrera 33 entre Calles 21 y 22",
+    "sector": "Los Alcázares",
     "tipo_via": "secundaria",
-    "lat": 11.2460,
-    "lng": -74.2135
+    "lat": 11.2252,
+    "lng": -74.1879
   }
 ]
