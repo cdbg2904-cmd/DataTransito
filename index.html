@@ -1,1 +1,184 @@
-<h>Hola mundo!gio</h>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control vial - Prueba de mapa</title>
+  <meta name="description" content="Interfaz de prueba con OpenStreetMap y Leaflet para visualización geográfica de reportes">
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.1 3.4 9.8 8 11 4.6-1.2 8-5.9 8-11V5l-8-3Zm0 3.1 5 1.9v4c0 3.6-2.2 7.1-5 8.1-2.8-1-5-4.5-5-8.1V7l5-1.9Zm-1 3h2v6h-2v-6Zm0 7h2v2h-2v-2Z"/></svg>
+      </div>
+      <div>
+        <span class="brand-kicker">Sistema piloto</span>
+        <h1>Control vial de Santa Marta</h1>
+      </div>
+    </div>
+    <div class="connection-status"><span></span> Datos de campo</div>
+  </header>
+
+  <main class="layout">
+    <section class="map-panel" aria-label="Mapa de reportes">
+      <div class="map-toolbar">
+        <div>
+          <span class="eyebrow">Vista geográfica</span>
+          <h2>Mapa de incidentes</h2>
+        </div>
+        <div class="toolbar-actions">
+          <button id="btn-modo-offline" class="toggle-button offline-button" type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3 2 4l4.2 4.2A9.9 9.9 0 0 0 2 12a10 10 0 0 0 16.4 7.7l2.2 2.2 1-1L3 3Zm9 17a8 8 0 0 1-8-8 7.9 7.9 0 0 1 2.6-5.9l11.4 11.4A7.9 7.9 0 0 1 12 20Zm-1-17v2.1a7.9 7.9 0 0 1 7.9 7.9H21A10 10 0 0 0 11 3Zm0 4v2a4 4 0 0 1 4 4h2a6 6 0 0 0-6-6Z"/></svg>
+            <span>Probar modo offline</span>
+          </button>
+          <button id="btn-alternar-capa" class="toggle-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 10.2A3.2 3.2 0 1 1 12 5.8a3.2 3.2 0 0 1 0 6.4Z"/></svg>
+            <span>Ver puntos individuales</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="mapa" class="map" aria-label="Mapa OpenStreetMap"></div>
+
+      <div class="map-footer">
+        <div class="legend" aria-label="Leyenda de criticidad">
+          <span><i class="dot low"></i>Bajo</span>
+          <span><i class="dot medium"></i>Medio</span>
+          <span><i class="dot high"></i>Alto</span>
+        </div>
+        <p id="estado-mapa">Cargando reportes...</p>
+      </div>
+    </section>
+
+    <aside class="summary-panel" aria-label="Resumen de la prueba">
+      <span class="eyebrow">Resumen rápido</span>
+      <h2>Registros cargados</h2>
+
+      <div class="total-card">
+        <div>
+          <strong id="total-reportes">—</strong>
+          <span>reportes</span>
+        </div>
+        <div class="total-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 13h18v8H3v-8Zm2 2v4h14v-4H5Zm1-12h12l2 8H4l2-8Zm3 2-1.2 4h8.4L13 5H9Z"/></svg>
+        </div>
+      </div>
+
+      <div class="critical-list">
+        <div class="critical-row">
+          <span><i class="dot high"></i>Alta</span>
+          <strong id="total-alto">—</strong>
+        </div>
+        <div class="critical-row">
+          <span><i class="dot medium"></i>Media</span>
+          <strong id="total-medio">—</strong>
+        </div>
+        <div class="critical-row">
+          <span><i class="dot low"></i>Baja</span>
+          <strong id="total-bajo">—</strong>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/></svg>
+        <p>Interfaz de prueba. Selecciona un punto para ver la información del reporte.</p>
+      </div>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="js/criticidad.js"></script>
+  <script type="module">
+    import {
+      inicializarMapa,
+      actualizarCapasMapa,
+      alternarVistaMapa,
+      establecerModoOffline,
+      estaModoOffline
+    } from "./js/mapa.js?v=offline-simulated-bounds-2";
+
+    const boton = document.getElementById("btn-alternar-capa");
+    const textoBoton = boton.querySelector("span");
+    const botonOffline = document.getElementById("btn-modo-offline");
+    const textoBotonOffline = botonOffline.querySelector("span");
+    const estado = document.getElementById("estado-mapa");
+    let totalReportes = 0;
+    let modoOffline = false;
+
+    function actualizarControlesOffline(activo) {
+      modoOffline = activo;
+      botonOffline.setAttribute("aria-pressed", String(modoOffline));
+      textoBotonOffline.textContent = modoOffline
+        ? "Volver al mapa en línea"
+        : "Probar modo offline";
+      estado.textContent = modoOffline
+        ? "Modo offline simulado: centro aproximado y zoom limitado"
+        : `${totalReportes} reportes cargados`;
+    }
+
+    window.addEventListener("mapa:modo-offline", (evento) => {
+      actualizarControlesOffline(evento.detail.activo);
+    });
+
+    inicializarMapa();
+    actualizarControlesOffline(estaModoOffline());
+
+    try {
+      const [respuestaReportes, respuestaVias, respuestaCriterios] = await Promise.all([
+        fetch("datos/reportes.json"),
+        fetch("datos/vias.json"),
+        fetch("datos/criterios.json")
+      ]);
+
+      if (!respuestaReportes.ok || !respuestaVias.ok || !respuestaCriterios.ok) {
+        throw new Error("No se pudieron cargar los datos locales");
+      }
+
+      const [reportes, vias, criterios] = await Promise.all([
+        respuestaReportes.json(),
+        respuestaVias.json(),
+        respuestaCriterios.json()
+      ]);
+
+      const reportesProcesados = reportes.map((reporte) => ({
+        ...reporte,
+        criticidad: window.calcularCriticidad
+          ? window.calcularCriticidad(reporte, criterios, vias)
+          : reporte.criticidad
+      }));
+
+      actualizarCapasMapa(reportesProcesados);
+
+      document.getElementById("total-reportes").textContent = reportesProcesados.length;
+      document.getElementById("total-alto").textContent =
+        reportesProcesados.filter((r) => r.criticidad.nivel === "Alto").length;
+      document.getElementById("total-medio").textContent =
+        reportesProcesados.filter((r) => r.criticidad.nivel === "Medio").length;
+      document.getElementById("total-bajo").textContent =
+        reportesProcesados.filter((r) => r.criticidad.nivel === "Bajo").length;
+
+      totalReportes = reportesProcesados.length;
+      actualizarControlesOffline(estaModoOffline());
+    } catch (error) {
+      console.error(error);
+      estado.textContent = "No se pudieron cargar los datos";
+    }
+
+    boton.addEventListener("click", () => {
+      const mostrandoCalor = alternarVistaMapa();
+      textoBoton.textContent = mostrandoCalor
+        ? "Ver puntos individuales"
+        : "Ver mapa de calor";
+    });
+
+    botonOffline.addEventListener("click", () => {
+      actualizarControlesOffline(establecerModoOffline(!estaModoOffline()));
+    });
+  </script>
+</body>
+</html>
