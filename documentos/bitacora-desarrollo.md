@@ -86,9 +86,10 @@ Se evalúan por prioridad y cada recomendación muestra la regla que la produjo:
 | R0 | Ninguna anterior | Monitoreo regular (por defecto) |
 
 ### Pendientes / handoff a otros roles
-- [ ] **Analista de campo:** faltan registros — `reportes.json` tiene **2 de 30**
-      y `vias.json` tiene **3 cuadras** (se piden 6–10). El motor ya está listo
-      para recibirlos; la cuadra de cada reporte debe existir en `vias.json`.
+- [ ] **Analista de campo:** entregar los datos **reales** de campo. Por ahora
+      `reportes.json` (30) y `vias.json` (8) tienen datos **de prueba sintéticos**
+      (ver entrada del 2026-11-23 abajo); se deben reemplazar por los reales. La
+      cuadra de cada reporte debe existir como `id` en `vias.json`.
 - [ ] **Integrador de mapa:** `js/mapa.json` tiene extensión equivocada; debería
       ser `js/mapa.js`. La capa de calor debe ponderar la intensidad por
       `reporte.criticidad.puntaje`.
@@ -97,6 +98,50 @@ Se evalúan por prioridad y cada recomendación muestra la regla que la produjo:
       `criticidad.js` → `filtros.js` → `resumen.js` → `captura.js` → `mapa.js`.
 - [ ] Instalar **Node.js** para poder correr las pruebas automáticas de la lógica
       (los archivos ya exportan sus funciones).
+
+---
+
+## 🗓️ 2026-11-23 — Datos de PRUEBA (sintéticos) para validar la lógica
+
+**Autor:** Ingeniero de Lógica y Clasificación · (apoyo IA: Claude)
+
+> ⚠️ **IMPORTANTE:** los datos actuales de `datos/vias.json` (8 cuadras) y
+> `datos/reportes.json` (30 registros) son **sintéticos, solo para probar la
+> lógica**. Deben reemplazarse por los **datos reales de campo** que entregue el
+> **Analista de Campo**. El motor ya está listo; al cambiar los datos no hay que
+> tocar el código.
+
+### Cómo están diseñados
+Los 30 reportes de prueba están armados para que se **dispare cada regla** de
+recomendación y se vea un Top 5 claro. Puntajes calculados a mano con
+`criterios.json`. Resultado esperado del resumen operativo (Top 5):
+
+| # | Cuadra | Puntaje acumulado | Regla que aplica | Recomendación |
+| :- | :----- | :---------------- | :--------------- | :------------ |
+| 1 | CR5-C14-C15 (arterial) | **42** | R1 (4 Alto en hora pico) | Patrullaje prioritario en hora pico |
+| 2 | CR3-C11-C12 (Mercado, secundaria) | **27** | R2 (predomina invasión de andén) | Operativo de espacio público |
+| 3 | CL22-CR3-CR4 (Campo Serrano) | **25** | R3 (predomina vehículo de carga) | Revisar horario de cargue y descargue |
+| 4 | CR5-C15-C16 (arterial) | **24** | R0 | Monitoreo regular |
+| 5 | CR4-C13-C14 (arterial) | **24** | R0 | Monitoreo regular |
+
+> Otras cuadras fuera del Top 5: CL22-CR4-CR5 (24, R0), C16-CR3-CR4 (22, R2),
+> C15-CR4-CR5 (20, R0).
+
+### Cómo reemplazar por los datos reales
+1. Pedir al Analista el `vias.json` real (6–10 cuadras clasificadas) y el
+   `reportes.json` real (30 registros de dos recorridos).
+2. Verificar que **cada `cuadra` de un reporte exista como `id` en `vias.json`**
+   (si no, el componente de vía suma 0).
+3. Reemplazar ambos archivos. No se toca `criticidad.js`, `filtros.js` ni
+   `resumen.js`.
+
+### Pruebas rápidas sugeridas (para la sustentación)
+- **RF-02:** recalcular a mano MP-001 (`2+3+3=8/Alto`) y MP-012
+  (`3+1+3=7/Alto`, secundaria en pico) y comparar con el sistema.
+- **RF-04:** filtrar `categoria=invasion_anden` + `franja=valle` y contar a mano.
+- **RF-05:** subir en `criterios.json` el peso de `invasion_anden` de 2 a 4 y
+  mostrar cómo CR3-C11-C12 sube en el ranking (demuestra que las reglas viven en
+  el JSON, no en el código).
 
 ---
 

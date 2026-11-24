@@ -16,11 +16,51 @@
     "lng": -74.2108
   },
   {
+    "id": "CR4-C13-C14",
+    "nombre": "Carrera 4 entre Calles 13 y 14",
+    "sector": "Centro Histórico",
+    "tipo_via": "arterial",
+    "lat": 11.2430,
+    "lng": -74.2115
+  },
+  {
     "id": "C15-CR4-CR5",
     "nombre": "Calle 15 entre Carreras 4 y 5",
     "sector": "Centro Histórico",
     "tipo_via": "secundaria",
     "lat": 11.2418,
     "lng": -74.2112
+  },
+  {
+    "id": "C16-CR3-CR4",
+    "nombre": "Calle 16 entre Carreras 3 y 4",
+    "sector": "Centro Histórico",
+    "tipo_via": "secundaria",
+    "lat": 11.2409,
+    "lng": -74.2120
+  },
+  {
+    "id": "CL22-CR3-CR4",
+    "nombre": "Calle 22 (Av. Campo Serrano) entre Carreras 3 y 4",
+    "sector": "Av. Campo Serrano",
+    "tipo_via": "arterial",
+    "lat": 11.2445,
+    "lng": -74.2098
+  },
+  {
+    "id": "CL22-CR4-CR5",
+    "nombre": "Calle 22 (Av. Campo Serrano) entre Carreras 4 y 5",
+    "sector": "Av. Campo Serrano",
+    "tipo_via": "arterial",
+    "lat": 11.2440,
+    "lng": -74.2092
+  },
+  {
+    "id": "CR3-C11-C12",
+    "nombre": "Carrera 3 entre Calles 11 y 12",
+    "sector": "Mercado Público",
+    "tipo_via": "secundaria",
+    "lat": 11.2460,
+    "lng": -74.2135
   }
 ]
