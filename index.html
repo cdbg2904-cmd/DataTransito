@@ -3,161 +3,293 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control vial - Prueba de mapa</title>
-  <meta name="description" content="Interfaz de prueba con OpenStreetMap y Leaflet para visualización geográfica de reportes">
+  <title>DataTransito · Control Vial Santa Marta</title>
+  <meta name="description" content="Aplicación web para reportar obstrucciones viales, calcular criticidad y priorizar patrullaje en Santa Marta.">
   <link rel="preconnect" href="https://unpkg.com">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="css/style.css?v=formulario-evidencia">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="topbar">
+  <!-- BARRA SUPERIOR OSCURA COMO EN TU BOCETO -->
+  <header class="topbar no-print">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.1 3.4 9.8 8 11 4.6-1.2 8-5.9 8-11V5l-8-3Zm0 3.1 5 1.9v4c0 3.6-2.2 7.1-5 8.1-2.8-1-5-4.5-5-8.1V7l5-1.9Zm-1 3h2v6h-2v-6Zm0 7h2v2h-2v-2Z"/></svg>
       </div>
       <div>
-        <span class="brand-kicker">Sistema piloto</span>
-        <h1>Control vial de Santa Marta</h1>
+        <h1>DataTransito</h1>
+        <span class="brand-kicker">Sistema piloto · Santa Marta</span>
       </div>
     </div>
-    <div class="connection-status"><span></span> Datos de campo</div>
+
+    <nav class="view-tabs" aria-label="Navegación principal">
+      <button id="tab-captura" class="view-tab tab-reportar" type="button" data-vista="captura" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2Zm0 18H7V5h10v14Z"/></svg>
+        <span>REPORTAR INCIDENTE</span>
+      </button>
+      <button id="tab-tablero" class="view-tab tab-tablero" type="button" data-vista="tablero" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z"/></svg>
+        <span>TABLERO OPERATIVO</span>
+      </button>
+    </nav>
   </header>
 
-  <main class="layout">
-    <section class="map-panel" aria-label="Mapa de reportes">
-      <div class="map-toolbar">
+  <div class="app-container">
+    <!-- ===============================================================
+         PANEL SUPERIOR (ESCRITORIO) / VISTA COMPLETA (CELULAR): CAPTURA
+         =============================================================== -->
+    <section id="vista-captura" class="report-panel no-print" aria-labelledby="titulo-formulario">
+      <div class="report-panel-head">
         <div>
-          <span class="eyebrow">Vista geográfica</span>
-          <h2>Mapa de incidentes</h2>
+          <span class="eyebrow">Participación ciudadana </span>
+          <h2 id="titulo-formulario">Reporta un incidente</h2>
         </div>
-        <div class="toolbar-actions">
-          <button id="btn-modo-offline" class="toggle-button offline-button" type="button" aria-pressed="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3 2 4l4.2 4.2A9.9 9.9 0 0 0 2 12a10 10 0 0 0 16.4 7.7l2.2 2.2 1-1L3 3Zm9 17a8 8 0 0 1-8-8 7.9 7.9 0 0 1 2.6-5.9l11.4 11.4A7.9 7.9 0 0 1 12 20Zm-1-17v2.1a7.9 7.9 0 0 1 7.9 7.9H21A10 10 0 0 0 11 3Zm0 4v2a4 4 0 0 1 4 4h2a6 6 0 0 0-6-6Z"/></svg>
-            <span>Probar modo offline</span>
-          </button>
-          <button id="btn-alternar-capa" class="toggle-button" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 10.2A3.2 3.2 0 1 1 12 5.8a3.2 3.2 0 0 1 0 6.4Z"/></svg>
-            <span>Ver puntos individuales</span>
-          </button>
+        <div class="connection-badge">
+          <span class="status-dot"></span>
+          <span>Datos de campo · Conectado</span>
         </div>
       </div>
 
-      <div id="mapa" class="map" aria-label="Mapa OpenStreetMap"></div>
+      <form id="formulario-reporte" class="report-form-row" novalidate>
+        <label class="field-group">
+          <span>¿Qué ocurrió?</span>
+          <select id="reporte-categoria" name="categoria" required disabled>
+            <option value="">¿Qué ocurrió?...</option>
+            <option value="doble_fila">Vehículo en doble fila / vía prohibida</option>
+            <option value="bloqueo_rampa_cebra_paradero">Bloqueo de rampa, cebra o paradero</option>
+            <option value="invasion_anden">Invasión del andén por comercio/moto</option>
+          </select>
+        </label>
 
-      <div class="map-footer">
-        <div class="legend" aria-label="Leyenda de criticidad">
-          <span><i class="dot low"></i>Bajo</span>
-          <span><i class="dot medium"></i>Medio</span>
-          <span><i class="dot high"></i>Alto</span>
+        <div class="field-group">
+          <div class="label-with-action">
+            <span>¿En qué cuadra?</span>
+            <div class="loc-mini-btns">
+              <button id="btn-gps" class="mini-pill-btn" type="button" disabled title="Usar GPS del celular">
+                📍 Usar GPS
+              </button>
+              <button id="btn-toggle-minimapa" class="mini-pill-btn" type="button" title="Marcar en el mapa">
+                🗺️ Mapa
+              </button>
+            </div>
+          </div>
+          <select id="reporte-cuadra" name="cuadra" required disabled>
+            <option value="">Cargando cuadras...</option>
+          </select>
         </div>
-        <p id="estado-mapa">Cargando reportes...</p>
+
+        <label class="field-group">
+          <span>¿Qué actor está involucrado?</span>
+          <select id="reporte-actor" name="actor" required disabled>
+            <option value="">Selecciona actor...</option>
+            <option value="vehiculo_particular">Vehículo particular</option>
+            <option value="motocicleta">Motocicleta</option>
+            <option value="vehiculo_carga">Vehículo de carga descargando</option>
+            <option value="mobiliario_comercial">Mobiliario comercial</option>
+          </select>
+        </label>
+
+        <div class="field-group">
+          <span>Adjunta una foto (opcional)</span>
+          <div class="photo-inline">
+            <label class="file-btn" for="reporte-foto">Seleccionar foto</label>
+            <input
+              id="reporte-foto"
+              name="foto"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              class="sr-only-input"
+              disabled
+            >
+            <div id="preview-foto-box" class="photo-preview-inline hidden">
+              <img id="preview-foto-img" alt="Vista previa">
+              <button id="btn-quitar-foto" type="button" class="remove-photo-x" title="Quitar foto">✕</button>
+            </div>
+          </div>
+          <small class="photo-note">Sin placas ni rostros · máx. 800 px.</small>
+        </div>
+
+        <button id="btn-enviar-reporte" class="submit-yellow-btn" type="submit" disabled>
+          Enviar reporte
+        </button>
+      </form>
+
+      <!-- Mini-mapa para marcar ubicación al tocar (visible al pulsar "Mapa" o en celular) -->
+      <div id="contenedor-minimapa" class="minimapa-drawer hidden">
+        <div class="minimapa-bar">
+          <span id="estado-ubicacion" class="location-pill">Toca el mapa para ubicar el incidente y asociar la cuadra</span>
+        </div>
+        <div id="mapa-captura" class="capture-minimap" aria-label="Mapa para marcar ubicación"></div>
+      </div>
+
+      <div class="form-feedback-row">
+        <p id="estado-formulario" class="form-status" role="status" aria-live="polite">
+          Cargando catálogo de cuadras...
+        </p>
+        <div id="resultado-criticidad-captura" class="capture-result hidden" aria-live="polite"></div>
       </div>
     </section>
 
-    <aside class="summary-panel" aria-label="Resumen de la prueba">
-      <span class="eyebrow">Resumen rápido</span>
-      <div class="summary-heading">
-        <h2>Registros cargados</h2>
-        <button id="btn-actualizar-datos" class="refresh-button" type="button" aria-label="Actualizar reportes">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.93 9h-2.02A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>
-          <span>Actualizar</span>
-        </button>
-      </div>
-
-      <div class="total-card">
+    <!-- ===============================================================
+         ZONA PRINCIPAL: MAPA CON FILTROS FLOTANTES + BARRA LATERAL
+         =============================================================== -->
+    <div id="vista-tablero" class="dashboard-shell">
+      <!-- Encabezado solo visible al imprimir (RF-05) -->
+      <header class="print-only-header">
         <div>
-          <strong id="total-reportes">—</strong>
-          <span>reportes</span>
+          <span class="eyebrow">DataTransito · Movilidad Santa Marta</span>
+          <h1>Resumen Operativo de Puntos Críticos</h1>
         </div>
-        <div class="total-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M3 13h18v8H3v-8Zm2 2v4h14v-4H5Zm1-12h12l2 8H4l2-8Zm3 2-1.2 4h8.4L13 5H9Z"/></svg>
+        <div class="print-meta">
+          <p id="fecha-impresion"></p>
+          <p id="filtros-impresion"></p>
         </div>
-      </div>
+      </header>
 
-      <div class="critical-list">
-        <div class="critical-row">
-          <span><i class="dot high"></i>Alta</span>
-          <strong id="total-alto">—</strong>
-        </div>
-        <div class="critical-row">
-          <span><i class="dot medium"></i>Media</span>
-          <strong id="total-medio">—</strong>
-        </div>
-        <div class="critical-row">
-          <span><i class="dot low"></i>Baja</span>
-          <strong id="total-bajo">—</strong>
-        </div>
-      </div>
+      <div class="main-grid">
+        <!-- COLUMNA IZQUIERDA: MAPA + FILTROS RÁPIDOS FLOTANTES -->
+        <section class="map-panel no-print" aria-label="Mapa de incidentes">
+          <div class="map-toolbar">
+            <div>
+              <span class="eyebrow">Vista geográfica </span>
+              <h2>Mapa de incidentes</h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="btn-modo-offline" class="toggle-button offline-button" type="button" aria-pressed="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3 2 4l4.2 4.2A9.9 9.9 0 0 0 2 12a10 10 0 0 0 16.4 7.7l2.2 2.2 1-1L3 3Zm9 17a8 8 0 0 1-8-8 7.9 7.9 0 0 1 2.6-5.9l11.4 11.4A7.9 7.9 0 0 1 12 20Zm-1-17v2.1a7.9 7.9 0 0 1 7.9 7.9H21A10 10 0 0 0 11 3Zm0 4v2a4 4 0 0 1 4 4h2a6 6 0 0 0-6-6Z"/></svg>
+                <span>Probar modo offline</span>
+              </button>
+              <button id="btn-alternar-capa" class="toggle-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 10.2A3.2 3.2 0 1 1 12 5.8a3.2 3.2 0 0 1 0 6.4Z"/></svg>
+                <span>Ver puntos individuales</span>
+              </button>
+            </div>
+          </div>
 
-      <div class="info-card">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/></svg>
-        <p>Interfaz de prueba. Selecciona un punto para ver la información del reporte.</p>
-      </div>
-    </aside>
-  </main>
+          <div class="map-stage">
+            <!-- Barra flotante de Filtros Rápidos sobre el mapa (RF-04) -->
+            <div class="floating-filters" aria-label="Filtros rápidos">
+              <span class="floating-filters-label">Filtrar mapa</span>
+              <select id="filtro-sector" aria-label="Filtrar por sector">
+                <option value="todos">Sector: Todos</option>
+              </select>
+              <select id="filtro-cuadra" aria-label="Filtrar por cuadra">
+                <option value="todos">Cuadra: Todas</option>
+              </select>
+              <select id="filtro-franja" aria-label="Filtrar por franja horaria">
+                <option value="todos">Franja horaria</option>
+                <option value="pico">Hora pico</option>
+                <option value="valle">Hora valle</option>
+              </select>
+              <select id="filtro-categoria" aria-label="Filtrar por categoría">
+                <option value="todos">Categoría</option>
+                <option value="doble_fila">Doble fila</option>
+                <option value="bloqueo_rampa_cebra_paradero">Rampa/cebra/paradero</option>
+                <option value="invasion_anden">Invasión andén</option>
+              </select>
+              <select id="filtro-actor" aria-label="Filtrar por actor">
+                <option value="todos">Actor</option>
+                <option value="vehiculo_particular">Vehículo particular</option>
+                <option value="motocicleta">Motocicleta</option>
+                <option value="vehiculo_carga">Vehículo de carga</option>
+                <option value="mobiliario_comercial">Mobiliario comercial</option>
+              </select>
+              <button id="btn-limpiar-filtros" class="clear-filters-chip" type="button" title="Limpiar filtros">✕</button>
+            </div>
 
-  <section class="report-form-panel" aria-labelledby="titulo-formulario">
-    <div class="report-form-heading">
-      <div>
-        <span class="eyebrow">Participación ciudadana</span>
-        <h2 id="titulo-formulario">Reporta un incidente</h2>
-        <p>Elige cuatro opciones y adjunta una foto; toma menos de 30 segundos. No pedimos datos personales.</p>
+            <div id="mapa" class="map" aria-label="Mapa OpenStreetMap"></div>
+          </div>
+
+          <div class="map-footer">
+            <div class="legend" aria-label="Leyenda de criticidad">
+              <span><i class="dot low"></i>Bajo</span>
+              <span><i class="dot medium"></i>Medio</span>
+              <span><i class="dot high"></i>Alto</span>
+            </div>
+            <p id="estado-mapa">Cargando reportes...</p>
+          </div>
+        </section>
+
+        <!-- COLUMNA DERECHA: RESUMEN OPERATIVO + TOP 5 + IMPRIMIR + ADMIN -->
+        <aside class="sidebar-stack">
+          <section class="summary-panel" aria-label="Resumen operativo">
+            <span class="eyebrow">Resumen operativo</span>
+            <div class="summary-heading">
+              <h2>Registros cargados</h2>
+              <button id="btn-actualizar-datos" class="refresh-button no-print" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.93 9h-2.02A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35Z"/></svg>
+                <span>Actualizar</span>
+              </button>
+            </div>
+
+            <div class="total-card">
+              <div>
+                <strong id="total-reportes">—</strong>
+                <span>reportes</span>
+              </div>
+              <div class="total-icon no-print" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 13h18v8H3v-8Zm2 2v4h14v-4H5Zm1-12h12l2 8H4l2-8Zm3 2-1.2 4h8.4L13 5H9Z"/></svg>
+              </div>
+            </div>
+
+            <div class="critical-list">
+              <div class="critical-row">
+                <span><i class="dot high"></i>Alta</span>
+                <strong id="total-alto">—</strong>
+              </div>
+              <div class="critical-row">
+                <span><i class="dot medium"></i>Media</span>
+                <strong id="total-medio">—</strong>
+              </div>
+              <div class="critical-row">
+                <span><i class="dot low"></i>Baja</span>
+                <strong id="total-bajo">—</strong>
+              </div>
+            </div>
+
+            <!-- Porcentaje por categoría (CU-02) -->
+            <div class="category-share">
+              <h3>Porcentaje por categoría</h3>
+              <div id="desglose-categorias" class="category-bars"></div>
+            </div>
+
+            <!-- Top 5 Cuadras Críticas (RF-05) -->
+            <div class="top5-section">
+              <h3>Top 5 Cuadras Críticas</h3>
+              <div id="lista-resumen-top5" class="top5-list">
+                <p class="muted-empty">Calculando...</p>
+              </div>
+            </div>
+
+            <button id="btn-imprimir-resumen" class="print-green-btn no-print" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3Zm-3 11H8v-5h8v5Zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1Zm-1-9H6v4h12V3Z"/></svg>
+              <span>Imprimir reporte</span>
+            </button>
+          </section>
+
+          <!-- Tarjeta Opciones Avanzadas (Admin) como en tu boceto (RF-06) -->
+          <section class="admin-panel no-print" aria-label="Opciones avanzadas">
+            <h3>⚙ Opciones avanzadas (Admin)</h3>
+            <div class="sync-buttons">
+              <button id="btn-exportar-json" class="sync-btn" type="button">Exportar JSON</button>
+              <label class="sync-btn sync-btn-secondary" for="input-importar-json">Importar JSON</label>
+              <input id="input-importar-json" type="file" accept=".json,application/json" multiple class="sr-only-input">
+            </div>
+            <p id="estado-importacion" class="sync-status" role="status" aria-live="polite"></p>
+          </section>
+        </aside>
       </div>
-      <span class="quick-report-badge">Menos de 30 s</span>
     </div>
-    <form id="formulario-reporte" class="report-form">
-      <label>
-        <span>¿Qué ocurrió?</span>
-        <select id="reporte-categoria" name="categoria" required disabled>
-          <option value="">Selecciona el incidente</option>
-          <option value="doble_fila">Vehículo en doble fila</option>
-          <option value="bloqueo_rampa_cebra_paradero">Bloqueo de rampa, cebra o paradero</option>
-          <option value="invasion_anden">Invasión del andén</option>
-        </select>
-      </label>
-      <label>
-        <span>¿En qué cuadra?</span>
-        <select id="reporte-cuadra" name="cuadra" required disabled>
-          <option value="">Selecciona la ubicación</option>
-        </select>
-      </label>
-      <label>
-        <span>¿Qué actor está involucrado?</span>
-        <select id="reporte-actor" name="actor" required disabled>
-          <option value="">Selecciona el actor</option>
-          <option value="vehiculo_particular">Vehículo particular</option>
-          <option value="vehiculo_carga">Vehículo de carga</option>
-          <option value="motocicleta">Motocicleta</option>
-          <option value="mobiliario_comercial">Mobiliario comercial</option>
-        </select>
-      </label>
-      <label class="photo-upload-field">
-        <span>Adjunta una foto de evidencia <strong>(obligatoria)</strong></span>
-        <input
-          id="reporte-foto"
-          name="foto"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          aria-describedby="ayuda-foto"
-          required
-          disabled
-        >
-        <small id="ayuda-foto">Se reduce automáticamente; máximo 10 MB antes de comprimir.</small>
-      </label>
-      <button id="btn-enviar-reporte" class="submit-report-button" type="submit" disabled>
-        Enviar reporte
-      </button>
-    </form>
-    <p id="estado-formulario" class="form-status" role="status" aria-live="polite">
-      Cargando ubicaciones...
-    </p>
-    <p class="form-storage-note">Este prototipo guarda tus reportes en este navegador; no se envían a un servidor.</p>
-  </section>
+  </div>
 
+  <!-- Librerías y módulos del equipo -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   <script src="js/criticidad.js"></script>
+  <script src="js/filtros.js"></script>
+  <script src="js/resumen.js"></script>
+
   <script type="module">
     import {
       inicializarMapa,
@@ -165,45 +297,117 @@
       alternarVistaMapa,
       establecerModoOffline,
       estaModoOffline
-    } from "./js/mapa.js?v=formulario-evidencia";
+    } from "./js/mapa.js";
+    import {
+      inicializarCaptura,
+      leerReportesComunidad,
+      guardarReportesComunidad,
+      fusionarReportesSinDuplicados
+    } from "./js/captura.js";
 
-    const boton = document.getElementById("btn-alternar-capa");
-    const textoBoton = boton.querySelector("span");
+    const tabCaptura = document.getElementById("tab-captura");
+    const tabTablero = document.getElementById("tab-tablero");
+    const vistaCaptura = document.getElementById("vista-captura");
+    const vistaTablero = document.getElementById("vista-tablero");
+    const btnToggleMinimapa = document.getElementById("btn-toggle-minimapa");
+    const contenedorMinimapa = document.getElementById("contenedor-minimapa");
+
+    const botonCapa = document.getElementById("btn-alternar-capa");
+    const textoBotonCapa = botonCapa.querySelector("span");
     const botonOffline = document.getElementById("btn-modo-offline");
     const textoBotonOffline = botonOffline.querySelector("span");
-    const estado = document.getElementById("estado-mapa");
     const botonActualizar = document.getElementById("btn-actualizar-datos");
-    const formularioReporte = document.getElementById("formulario-reporte");
-    const selectorCuadra = document.getElementById("reporte-cuadra");
-    const selectorFoto = document.getElementById("reporte-foto");
-    const estadoFormulario = document.getElementById("estado-formulario");
-    const botonEnviarReporte = document.getElementById("btn-enviar-reporte");
-    const CLAVE_REPORTES_COMUNIDAD = "control-vial-reportes-comunidad-v1";
-    let totalReportes = 0;
-    let ultimaActualizacion = null;
-    let modoOffline = false;
+    const estadoMapa = document.getElementById("estado-mapa");
+
+    const filtroSector = document.getElementById("filtro-sector");
+    const filtroCuadra = document.getElementById("filtro-cuadra");
+    const filtroFranja = document.getElementById("filtro-franja");
+    const filtroCategoria = document.getElementById("filtro-categoria");
+    const filtroActor = document.getElementById("filtro-actor");
+    const btnLimpiarFiltros = document.getElementById("btn-limpiar-filtros");
+
+    const desgloseCategorias = document.getElementById("desglose-categorias");
+    const listaResumenTop5 = document.getElementById("lista-resumen-top5");
+    const btnImprimir = document.getElementById("btn-imprimir-resumen");
+    const btnExportar = document.getElementById("btn-exportar-json");
+    const inputImportar = document.getElementById("input-importar-json");
+    const estadoImportacion = document.getElementById("estado-importacion");
+    const fechaImpresion = document.getElementById("fecha-impresion");
+    const filtrosImpresion = document.getElementById("filtros-impresion");
+
+    const NOMBRES_CATEGORIA = {
+      doble_fila: "Doble fila",
+      bloqueo_rampa_cebra_paradero: "Rampa/cebra",
+      invasion_anden: "Invasión andén"
+    };
+
     let reportesBase = [];
     let reportesComunidad = [];
     let viasDisponibles = [];
     let criteriosDisponibles = null;
+    let totalVisibles = 0;
+    let ultimaActualizacion = null;
 
-    function leerReportesComunidad() {
-      const datosGuardados = localStorage.getItem(CLAVE_REPORTES_COMUNIDAD);
-      if (!datosGuardados) return [];
+    function esMovil() {
+      return window.innerWidth <= 900;
+    }
 
-      const reportesGuardados = JSON.parse(datosGuardados);
-      if (!Array.isArray(reportesGuardados)) {
-        throw new Error("Los reportes guardados en este navegador tienen un formato inválido.");
+    function activarVista(vista) {
+      if (esMovil()) {
+        const enCaptura = vista === "captura";
+        vistaCaptura.classList.toggle("vista-oculta", !enCaptura);
+        vistaTablero.classList.toggle("vista-oculta", enCaptura);
+        if (enCaptura) contenedorMinimapa.classList.remove("hidden");
+        tabCaptura.setAttribute("aria-pressed", String(enCaptura));
+        tabTablero.setAttribute("aria-pressed", String(!enCaptura));
+      } else {
+        // En computador se muestran ambas zonas como en el boceto
+        vistaCaptura.classList.remove("vista-oculta");
+        vistaTablero.classList.remove("vista-oculta");
+        tabCaptura.setAttribute("aria-pressed", String(vista === "captura"));
+        tabTablero.setAttribute("aria-pressed", String(vista === "tablero"));
+        if (vista === "captura") {
+          vistaCaptura.scrollIntoView({ behavior: "smooth", block: "start" });
+          document.getElementById("reporte-categoria")?.focus();
+        } else {
+          vistaTablero.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
       }
-      return reportesGuardados;
+      window.dispatchEvent(new Event("resize"));
     }
 
-    function guardarReportesComunidad(reportes) {
-      localStorage.setItem(CLAVE_REPORTES_COMUNIDAD, JSON.stringify(reportes));
+    tabCaptura.addEventListener("click", () => activarVista("captura"));
+    tabTablero.addEventListener("click", () => activarVista("tablero"));
+
+    btnToggleMinimapa.addEventListener("click", () => {
+      contenedorMinimapa.classList.toggle("hidden");
+      window.dispatchEvent(new Event("resize"));
+    });
+
+    // Al cargar: en celular abre directo en Reportar; en computador muestra el boceto completo
+    if (esMovil()) {
+      activarVista("captura");
+    } else {
+      vistaCaptura.classList.remove("vista-oculta");
+      vistaTablero.classList.remove("vista-oculta");
     }
 
-    function procesarReportes(reportes) {
-      return reportes.map((reporte) => ({
+    window.addEventListener("resize", () => {
+      if (!esMovil()) {
+        vistaCaptura.classList.remove("vista-oculta");
+        vistaTablero.classList.remove("vista-oculta");
+      }
+    });
+
+    function escaparHTML(valor) {
+      return String(valor ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function obtenerTodosLosReportes() {
+      const combinados = fusionarReportesSinDuplicados(reportesBase, reportesComunidad).combinados;
+      return combinados.map((reporte) => ({
         ...reporte,
         criticidad: window.calcularCriticidad
           ? window.calcularCriticidad(reporte, criteriosDisponibles, viasDisponibles)
@@ -211,237 +415,223 @@
       }));
     }
 
-    function actualizarResumenReportes(reportesProcesados) {
-      actualizarCapasMapa(reportesProcesados);
-      document.getElementById("total-reportes").textContent = reportesProcesados.length;
+    function obtenerFiltrosActivos() {
+      return {
+        sector: filtroSector.value,
+        cuadra: filtroCuadra.value,
+        franja: filtroFranja.value,
+        categoria: filtroCategoria.value,
+        actor: filtroActor.value
+      };
+    }
+
+    function renderizarPorcentajeCategorias(reportes) {
+      const total = reportes.length;
+      if (total === 0) {
+        desgloseCategorias.innerHTML = `<p class="muted-empty">Sin reportes.</p>`;
+        return;
+      }
+      desgloseCategorias.innerHTML = Object.keys(NOMBRES_CATEGORIA).map((cat) => {
+        const conteo = reportes.filter((r) => r.categoria === cat).length;
+        const pct = Math.round((conteo / total) * 100);
+        return `
+          <div class="cat-bar-item">
+            <div class="cat-bar-top">
+              <span>${NOMBRES_CATEGORIA[cat]}</span>
+              <strong>${conteo} (${pct}%)</strong>
+            </div>
+            <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderizarResumenTop5(reportes) {
+      if (!criteriosDisponibles || reportes.length === 0) {
+        listaResumenTop5.innerHTML = `<p class="muted-empty">Sin datos para los filtros elegidos.</p>`;
+        return;
+      }
+      const top5 = window.generarResumen(reportes, criteriosDisponibles, viasDisponibles);
+      listaResumenTop5.innerHTML = top5.map((item, idx) => `
+        <article class="top5-item">
+          <div class="top5-item-top">
+            <span class="top5-title">${idx + 1}. ${escaparHTML(item.nombre)}</span>
+            <span class="top5-badge"><i class="dot high"></i> ${item.puntajeAcumulado} pts</span>
+          </div>
+          <div class="top5-rec">${escaparHTML(item.recomendacion)}</div>
+          <div class="top5-rule">${escaparHTML(item.regla)}</div>
+        </article>
+      `).join("");
+    }
+
+    function actualizarMetadatosImpresion(filtros) {
+      fechaImpresion.textContent = `Generado: ${new Date().toLocaleString("es-CO")}`;
+      const activos = Object.entries(filtros)
+        .filter(([, val]) => val && val !== "todos")
+        .map(([k, v]) => `${k}: ${v}`);
+      filtrosImpresion.textContent = activos.length
+        ? `Filtros: ${activos.join(" | ")}`
+        : "Filtros: Todos los registros";
+    }
+
+    function actualizarTablero() {
+      if (!criteriosDisponibles) return;
+      const todos = obtenerTodosLosReportes();
+      const filtros = obtenerFiltrosActivos();
+      const filtrados = window.filtrarReportes
+        ? window.filtrarReportes(todos, filtros, criteriosDisponibles, viasDisponibles)
+        : todos;
+
+      actualizarCapasMapa(filtrados);
+
+      totalVisibles = filtrados.length;
+      document.getElementById("total-reportes").textContent = filtrados.length;
       document.getElementById("total-alto").textContent =
-        reportesProcesados.filter((reporte) => reporte.criticidad.nivel === "Alto").length;
+        filtrados.filter((r) => r.criticidad?.nivel === "Alto").length;
       document.getElementById("total-medio").textContent =
-        reportesProcesados.filter((reporte) => reporte.criticidad.nivel === "Medio").length;
+        filtrados.filter((r) => r.criticidad?.nivel === "Medio").length;
       document.getElementById("total-bajo").textContent =
-        reportesProcesados.filter((reporte) => reporte.criticidad.nivel === "Bajo").length;
-      totalReportes = reportesProcesados.length;
+        filtrados.filter((r) => r.criticidad?.nivel === "Bajo").length;
+
+      renderizarPorcentajeCategorias(filtrados);
+      renderizarResumenTop5(filtrados);
+      actualizarMetadatosImpresion(filtros);
+      actualizarEstadoMapa(estaModoOffline());
     }
 
-    function poblarSelectorCuadras(vias) {
-      selectorCuadra.replaceChildren(new Option("Selecciona la ubicación", ""));
-      vias.forEach((via) => {
-        const opcion = document.createElement("option");
-        opcion.value = via.id;
-        opcion.textContent = via.nombre;
-        selectorCuadra.append(opcion);
-      });
+    function poblarFiltros(vias) {
+      const sectores = [...new Set(vias.map((v) => v.sector))];
+      filtroSector.replaceChildren(new Option("Sector: Todos", "todos"));
+      sectores.forEach((sec) => filtroSector.append(new Option(sec, sec)));
+
+      filtroCuadra.replaceChildren(new Option("Cuadra: Todas", "todos"));
+      vias.forEach((via) => filtroCuadra.append(new Option(via.nombre, via.id)));
     }
 
-    function crearIdReporte(reportes) {
-      let id;
-      do {
-        id = `WEB-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      } while (reportes.some((reporte) => reporte.id === id));
-      return id;
+    function actualizarEstadoMapa(offlineActivo) {
+      botonOffline.setAttribute("aria-pressed", String(offlineActivo));
+      textoBotonOffline.textContent = offlineActivo ? "Volver en línea" : "Probar modo offline";
+      const etiqueta = totalVisibles === 1 ? "1 reporte" : `${totalVisibles} reportes`;
+      estadoMapa.textContent = offlineActivo
+        ? `Modo offline · ${etiqueta}`
+        : `${etiqueta}${ultimaActualizacion ? ` · act. ${ultimaActualizacion}` : ""}`;
     }
 
-    function comprimirFoto(file) {
-      if (!file || !file.type.startsWith("image/")) {
-        return Promise.reject(new Error("Adjunta una imagen para enviar el reporte."));
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        return Promise.reject(new Error("La foto debe pesar menos de 10 MB."));
-      }
-
-      return createImageBitmap(file).then(async (imagen) => {
-        try {
-          const escalaInicial = Math.min(1, 800 / Math.max(imagen.width, imagen.height));
-          let ancho = Math.max(1, Math.round(imagen.width * escalaInicial));
-          let alto = Math.max(1, Math.round(imagen.height * escalaInicial));
-          const lienzo = document.createElement("canvas");
-          const contexto = lienzo.getContext("2d");
-          if (!contexto) throw new Error("No se pudo preparar la imagen en este navegador.");
-
-          for (let intento = 0; intento < 6; intento += 1) {
-            lienzo.width = ancho;
-            lienzo.height = alto;
-            contexto.drawImage(imagen, 0, 0, ancho, alto);
-            const calidad = Math.max(0.42, 0.76 - intento * 0.08);
-            const imagenComprimida = await new Promise((resolve) => {
-              lienzo.toBlob(resolve, "image/jpeg", calidad);
-            });
-            if (!imagenComprimida) {
-              throw new Error("No se pudo comprimir la foto. Prueba con otra imagen.");
-            }
-            if (imagenComprimida.size <= 500 * 1024) {
-              return await new Promise((resolve, reject) => {
-                const lector = new FileReader();
-                lector.onload = () => resolve(lector.result);
-                lector.onerror = () => reject(new Error("No se pudo leer la foto comprimida."));
-                lector.readAsDataURL(imagenComprimida);
-              });
-            }
-            ancho = Math.max(1, Math.round(ancho * 0.8));
-            alto = Math.max(1, Math.round(alto * 0.8));
-          }
-
-          throw new Error("La foto sigue siendo muy pesada al comprimirla. Elige otra imagen.");
-        } finally {
-          imagen.close();
-        }
-      }).catch((error) => {
-        if (error instanceof Error && error.message) throw error;
-        throw new Error("No se pudo abrir la foto. Elige otra imagen.");
-      });
-    }
-
-    function actualizarControlesOffline(activo) {
-      modoOffline = activo;
-      botonOffline.setAttribute("aria-pressed", String(modoOffline));
-      textoBotonOffline.textContent = modoOffline
-        ? "Volver al mapa en línea"
-        : "Probar modo offline";
-      const etiquetaReportes = totalReportes === 1
-        ? "1 reporte cargado"
-        : `${totalReportes} reportes cargados`;
-      estado.textContent = modoOffline
-        ? "Modo offline simulado: centro aproximado y zoom limitado"
-        : totalReportes
-          ? `${etiquetaReportes}${ultimaActualizacion ? ` · actualizado ${ultimaActualizacion}` : ""}`
-          : "Cargando reportes...";
-    }
-
-    window.addEventListener("mapa:modo-offline", (evento) => {
-      actualizarControlesOffline(evento.detail.activo);
-    });
+    window.addEventListener("mapa:modo-offline", (ev) => actualizarEstadoMapa(ev.detail.activo));
 
     inicializarMapa();
-    actualizarControlesOffline(estaModoOffline());
+    actualizarEstadoMapa(estaModoOffline());
 
-    async function cargarDatosReportes() {
-      botonActualizar.disabled = true;
-      estado.textContent = "Actualizando reportes...";
-
-      try {
-        const [respuestaReportes, respuestaVias, respuestaCriterios] = await Promise.all([
-          fetch("datos/reportes.json", { cache: "no-store" }),
-          fetch("datos/vias.json", { cache: "no-store" }),
-          fetch("datos/criterios.json", { cache: "no-store" })
-        ]);
-
-        if (!respuestaReportes.ok || !respuestaVias.ok || !respuestaCriterios.ok) {
-          throw new Error(`Error HTTP al cargar los datos (reportes: ${respuestaReportes.status}, vías: ${respuestaVias.status}, criterios: ${respuestaCriterios.status})`);
-        }
-
-        const [reportes, vias, criterios] = await Promise.all([
-          respuestaReportes.json(),
-          respuestaVias.json(),
-          respuestaCriterios.json()
-        ]);
-
-        reportesBase = reportes;
-        viasDisponibles = vias;
-        criteriosDisponibles = criterios;
-        reportesComunidad = leerReportesComunidad();
-        poblarSelectorCuadras(viasDisponibles);
-        formularioReporte.reset();
-        formularioReporte.querySelectorAll("select, input[type='file']").forEach((control) => {
-          control.disabled = false;
-        });
-        botonEnviarReporte.disabled = false;
-        estadoFormulario.textContent = "Elige las opciones y envía tu reporte.";
-
-        const reportesProcesados = procesarReportes([
-          ...reportesBase,
-          ...reportesComunidad
-        ]);
-        actualizarResumenReportes(reportesProcesados);
-
+    const captura = inicializarCaptura({
+      onReporteGuardado: (nuevoReporte) => {
+        reportesComunidad = [...reportesComunidad, nuevoReporte];
         ultimaActualizacion = new Date().toLocaleTimeString("es-CO", {
           hour: "2-digit",
           minute: "2-digit"
         });
-        actualizarControlesOffline(estaModoOffline());
-      } catch (error) {
-        console.error("No se pudieron actualizar los reportes:", error);
-        estado.textContent = "No se pudieron cargar los datos; revisa la conexión o el JSON";
-        estadoFormulario.textContent =
-          `No se pudieron cargar las ubicaciones: ${error.message}`;
+        actualizarTablero();
+      }
+    });
+
+    async function cargarDatos() {
+      botonActualizar.disabled = true;
+      estadoMapa.textContent = "Actualizando reportes...";
+      try {
+        const [resReportes, resVias, resCriterios] = await Promise.all([
+          fetch("datos/reportes.json", { cache: "no-store" }),
+          fetch("datos/vias.json", { cache: "no-store" }),
+          fetch("datos/criterios.json", { cache: "no-store" })
+        ]);
+        if (!resReportes.ok || !resVias.ok || !resCriterios.ok) {
+          throw new Error("No se pudieron leer los JSON de datos/.");
+        }
+        [reportesBase, viasDisponibles, criteriosDisponibles] = await Promise.all([
+          resReportes.json(),
+          resVias.json(),
+          resCriterios.json()
+        ]);
+        reportesComunidad = leerReportesComunidad();
+        poblarFiltros(viasDisponibles);
+        captura.configurarDatos(viasDisponibles, criteriosDisponibles, () => obtenerTodosLosReportes());
+        ultimaActualizacion = new Date().toLocaleTimeString("es-CO", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        actualizarTablero();
+      } catch (err) {
+        console.error(err);
+        estadoMapa.textContent = "Error cargando datos JSON (usa Live Server o GitHub Pages).";
       } finally {
         botonActualizar.disabled = false;
       }
     }
 
-    formularioReporte.addEventListener("submit", async (evento) => {
-      evento.preventDefault();
-      if (!formularioReporte.reportValidity()) return;
+    [filtroSector, filtroCuadra, filtroFranja, filtroCategoria, filtroActor].forEach((el) => {
+      el.addEventListener("change", actualizarTablero);
+    });
 
-      botonEnviarReporte.disabled = true;
+    btnLimpiarFiltros.addEventListener("click", () => {
+      filtroSector.value = "todos";
+      filtroCuadra.value = "todos";
+      filtroFranja.value = "todos";
+      filtroCategoria.value = "todos";
+      filtroActor.value = "todos";
+      actualizarTablero();
+    });
+
+    botonActualizar.addEventListener("click", cargarDatos);
+    botonCapa.addEventListener("click", () => {
+      const mostrandoCalor = alternarVistaMapa();
+      textoBotonCapa.textContent = mostrandoCalor ? "Ver puntos individuales" : "Ver mapa de calor";
+    });
+    botonOffline.addEventListener("click", () => {
+      actualizarEstadoMapa(establecerModoOffline(!estaModoOffline()));
+    });
+
+    btnImprimir.addEventListener("click", () => {
+      actualizarMetadatosImpresion(obtenerFiltrosActivos());
+      window.print();
+    });
+
+    btnExportar.addEventListener("click", () => {
+      const todos = obtenerTodosLosReportes();
+      const blob = new Blob([JSON.stringify(todos, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = `datatransito-reportes-${new Date().toISOString().slice(0, 10)}.json`;
+      enlace.click();
+      URL.revokeObjectURL(url);
+      estadoImportacion.textContent = `Exportados ${todos.length} reportes en JSON.`;
+    });
+
+    inputImportar.addEventListener("change", async (ev) => {
+      const archivos = [...(ev.target.files || [])];
+      if (!archivos.length) return;
+      let totalNuevos = 0;
+      let totalDuplicados = 0;
+
       try {
-        const datosFormulario = new FormData(formularioReporte);
-        estadoFormulario.textContent = "Comprimiendo foto y guardando reporte...";
-        const cuadra = viasDisponibles.find((via) => via.id === datosFormulario.get("cuadra"));
-        if (!cuadra) {
-          throw new Error("La ubicación seleccionada no está disponible. Actualiza los datos e inténtalo de nuevo.");
+        for (const archivo of archivos) {
+          const datos = JSON.parse(await archivo.text());
+          if (!Array.isArray(datos)) throw new Error(`${archivo.name} no es una lista JSON.`);
+          const resultado = fusionarReportesSinDuplicados([...reportesBase, ...reportesComunidad], datos);
+          const idsBase = new Set(reportesBase.map((r) => r.id));
+          reportesComunidad = resultado.combinados.filter((r) => !idsBase.has(r.id));
+          guardarReportesComunidad(reportesComunidad);
+          totalNuevos += resultado.nuevos;
+          totalDuplicados += resultado.duplicados;
         }
-        const foto = await comprimirFoto(datosFormulario.get("foto"));
-
-        const fechaHora = new Date();
-        const fechaLocal = new Date(
-          fechaHora.getTime() - fechaHora.getTimezoneOffset() * 60000
-        ).toISOString().slice(0, 16);
-        const reporte = {
-          id: crearIdReporte([...reportesBase, ...reportesComunidad]),
-          origen: "comunidad",
-          fecha_hora: fechaLocal,
-          lat: cuadra.lat,
-          lng: cuadra.lng,
-          cuadra: cuadra.id,
-          categoria: datosFormulario.get("categoria"),
-          actor: datosFormulario.get("actor"),
-          foto
-        };
-        reporte.criticidad = window.calcularCriticidad(
-          reporte,
-          criteriosDisponibles,
-          viasDisponibles
-        );
-
-        const reportesComunidadActualizados = [...reportesComunidad, reporte];
-        guardarReportesComunidad(reportesComunidadActualizados);
-        reportesComunidad = reportesComunidadActualizados;
-        actualizarResumenReportes(procesarReportes([
-          ...reportesBase,
-          ...reportesComunidad
-        ]));
-        ultimaActualizacion = new Date().toLocaleTimeString("es-CO", {
-          hour: "2-digit",
-          minute: "2-digit"
-        });
-        actualizarControlesOffline(estaModoOffline());
-        formularioReporte.reset();
-        estadoFormulario.textContent =
-          `Reporte ${reporte.id} agregado al mapa y guardado en este navegador.`;
-      } catch (error) {
-        console.error("No se pudo guardar el reporte:", error);
-        estadoFormulario.textContent =
-          error instanceof DOMException && error.name === "QuotaExceededError"
-            ? "No hay espacio disponible para guardar el reporte en este navegador."
-            : `No se pudo guardar el reporte: ${error.message}`;
+        actualizarTablero();
+        estadoImportacion.textContent = `Listo: ${totalNuevos} nuevos, ${totalDuplicados} duplicados omitidos.`;
+      } catch (err) {
+        estadoImportacion.textContent = `Error: ${err.message}`;
       } finally {
-        botonEnviarReporte.disabled = false;
+        inputImportar.value = "";
       }
     });
 
-    botonActualizar.addEventListener("click", cargarDatosReportes);
-    await cargarDatosReportes();
-
-    boton.addEventListener("click", () => {
-      const mostrandoCalor = alternarVistaMapa();
-      textoBoton.textContent = mostrandoCalor
-        ? "Ver puntos individuales"
-        : "Ver mapa de calor";
-    });
-
-    botonOffline.addEventListener("click", () => {
-      actualizarControlesOffline(establecerModoOffline(!estaModoOffline()));
-    });
+    await cargarDatos();
   </script>
 </body>
 </html>
