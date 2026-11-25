@@ -8,9 +8,14 @@ let mostrandoCalor = true;
 let modoOffline = false;
 
 const CENTRO_UNIVERSIDAD = [11.2233, -74.1865];
+// Límites geográficos EXACTOS del PNG offline (datos/mapa-offline.png).
+// El PNG es un mosaico de teselas OpenStreetMap (zoom 16) generado para esta
+// zona, por lo que estos límites corresponden pixel a pixel con la imagen:
+// así el mapa de calor (que usa lat/lng reales) cae justo sobre las calles,
+// igual que en el mapa en línea. Formato: [[sur, oeste], [norte, este]].
 const LIMITES_MAPA_OFFLINE = [
-  [11.2131, -74.2246],
-  [11.2374, -74.1781]
+  [11.216122, -74.201660],
+  [11.243062, -74.168701]
 ];
 const ZOOM_INICIAL = 15.5;
 const ZOOM_EN_LINEA = ZOOM_INICIAL + 1;
@@ -76,7 +81,7 @@ export function inicializarMapa() {
   });
   controlZoom = L.control.zoom().addTo(mapa);
 
-  capaOffline = L.imageOverlay('datos/mapa-offline.png?v=university-center', LIMITES_MAPA_OFFLINE);
+  capaOffline = L.imageOverlay('datos/mapa-offline.png?v=mosaic-z16', LIMITES_MAPA_OFFLINE);
   capaOffline.on('error', (evento) => {
     console.error('No se pudo cargar datos/mapa-offline.png', evento);
   });

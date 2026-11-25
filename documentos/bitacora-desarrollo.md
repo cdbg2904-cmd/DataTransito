@@ -147,6 +147,49 @@ recomendación y se vea un Top 5 claro. Puntajes calculados a mano con
 
 ---
 
+## 🗓️ 2026-11-24 — Arreglo del mapa de calor en modo OFFLINE
+
+**Autor:** apoyo al Integrador de Mapa · (apoyo IA: Claude) · archivo: `js/mapa.js`
+
+### Síntoma
+En modo offline el mapa de calor aparecía en **ubicaciones distintas** a las del
+mapa en línea.
+
+### Causa
+El modo offline usa el PNG `datos/mapa-offline.png` como `L.imageOverlay`. Leaflet
+**estira** ese PNG para llenar el rectángulo `LIMITES_MAPA_OFFLINE`. Esos límites
+estaban puestos "a ojo" y **no correspondían** al área real de la imagen; además,
+el PNG viejo **ni siquiera cubría** todos los reportes (los del este, sobre la Av.
+del Libertador, y los del norte quedaban fuera). Como el mapa de calor usa
+`lat/lng` reales, al no coincidir los límites con la imagen, los puntos caían
+corridos.
+
+> ❌ No se deben "convertir" las coordenadas de cada punto (eso dañaría el online).
+> La solución correcta es **georreferenciar bien la imagen**.
+
+### Solución
+Se **regeneró** `datos/mapa-offline.png` como un **mosaico de teselas
+OpenStreetMap (zoom 16)** que cubre toda la zona de estudio (30 teselas →
+1536×1280 px). Como son teselas Web Mercator completas, sus límites geográficos
+son **exactos** y coinciden pixel a pixel con la imagen:
+
+```js
+const LIMITES_MAPA_OFFLINE = [
+  [11.216122, -74.201660], // SW
+  [11.243062, -74.168701]  // NE
+];
+```
+
+Verificación: se proyectaron varios reportes a píxeles del nuevo PNG y caen justo
+sobre sus calles (U. del Magdalena al centro, Av. del Ferrocarril al oeste, Av.
+del Libertador al este). Offline y online ahora coinciden.
+
+> 📝 Atribución: el PNG proviene de **© OpenStreetMap contributors** (ODbL). El
+> control de atribución del mapa ya lo muestra; conviene conservarlo.
+> Nota de rol: `js/mapa.js` es del **Integrador de Mapa** — coordinar el cambio.
+
+---
+
 ## 🧪 Bitácora de iteración (fallos de la IA) — mínimo 2
 
 > Plantilla a completar durante el desarrollo. El enunciado pide documentar al
