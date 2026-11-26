@@ -146,9 +146,13 @@ export function actualizarCapasMapa(reportes) {
   if (capaCalor) mapa.removeLayer(capaCalor);
   capaPuntos.clearLayers();
 
+  const reportesConCoordenadas = reportes.filter(reporte =>
+    Number.isFinite(Number(reporte.lat)) && Number.isFinite(Number(reporte.lng))
+  );
+
   // 1. Preparar datos para Leaflet.heat: [lat, lng, intensidad_normalizada]
   // Como el puntaje máximo es 9, dividimos entre 9 para que Leaflet.heat escale bien (0.0 a 1.0)
-  const puntosCalor = reportes.map(rep => [
+  const puntosCalor = reportesConCoordenadas.map(rep => [
     rep.lat,
     rep.lng,
     (rep.criticidad?.puntaje || 1) / 9
@@ -162,7 +166,7 @@ export function actualizarCapasMapa(reportes) {
 
   // Agrupar reportes en la misma coordenada para que todos queden visibles.
   const gruposPorCoordenada = new Map();
-  reportes.forEach(reporte => {
+  reportesConCoordenadas.forEach(reporte => {
     const clave = `${reporte.lat},${reporte.lng}`;
     const grupo = gruposPorCoordenada.get(clave) || [];
     grupo.push(reporte);

@@ -3,30 +3,40 @@
     "id_via": "C29H-CR21B-CR21F",
     "nombre": "Calle 29H (Portal Universitario / Villa Mónica)",
     "tipo_via": "arterial",
-    "puntos_via": 2
+    "puntos_via": 2,
+    "lat": 11.225467,
+    "lng": -74.190087
   },
   {
     "id_via": "C29I-CR21-CR21D",
     "nombre": "Calle 29I (Sector Parque Villa Marbella)",
     "tipo_via": "secundaria",
-    "puntos_via": 1
+    "puntos_via": 1,
+    "lat": 11.22436,
+    "lng": -74.190896
   },
   {
     "id_via": "C29L3-CR21A-CR21D",
     "nombre": "Calle 29L3 (Zona Comercial Unimagdalena)",
     "tipo_via": "secundaria",
-    "puntos_via": 1
+    "puntos_via": 1,
+    "lat": 11.224369,
+    "lng": -74.191574
   },
   {
     "id_via": "CR21C-C29G-C29I",
     "nombre": "Carrera 21C (Costado Parque Villa Marbella)",
     "tipo_via": "secundaria",
-    "puntos_via": 1
+    "puntos_via": 1,
+    "lat": 11.224733,
+    "lng": -74.190874
   },
   {
     "id_via": "CR21D1-C29K",
     "nombre": "Carrera 21D1 con Calle 29K",
     "tipo_via": "secundaria",
-    "puntos_via": 1
+    "puntos_via": 1,
+    "lat": 11.224788,
+    "lng": -74.190112
   }
 ]
