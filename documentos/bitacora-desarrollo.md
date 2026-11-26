@@ -43,12 +43,12 @@ El motor reproduce exactamente los puntajes guardados en `reportes.json`:
 
 | Reporte | Cuadra | Categoría | Vía | Franja | Suma | Nivel | Guardado |
 | :------ | :----- | :-------- | :-- | :----- | :--- | :---- | :------- |
-| MP-001  | CR32-C22-C23 | invasión andén (2) | arterial (3) | pico (3) — 12:15 ∈ 11:30–14:00 | **8** | **Alto** | 8 / Alto ✅ |
-| MP-011  | C22-CR31-CR32 | doble fila (3) | secundaria (1) | valle (1) — 09:40 ∉ horas pico | **5** | **Medio** | 5 / Medio ✅ |
+| MP-001  | C29I-CR21-CR21D | doble fila (3) | secundaria (1) | pico (1) — 17:51 ∈ 17:00–19:30 | **5** | **Medio** | 5 / Medio ✅ |
+| MP-007  | C29H-CR21B-CR21F | doble fila (3) | arterial (2) | pico (1) — 17:48 ∈ 17:00–19:30 | **6** | **Alto** | 6 / Alto ✅ |
 
 > Estos son los **dos casos calculados a mano** que se presentan al jurado.
-> El mecanismo coincide con el ejemplo del enunciado (invasión + arterial + pico
-> = 2+3+3 = 8, Alto).
+> Los campos `id_via` de los reportes se usan para buscar el tipo de vía en
+> `vias.json`; por eso el cálculo funciona tanto con `id_via` como con `cuadra`.
 
 ### Decisiones y justificación de las reglas de criticidad
 Pesos definidos en `datos/criterios.json` (se guardan en el JSON y **no** en el
@@ -60,17 +60,19 @@ la sustentación):
   *Justificación:* la doble fila y el bloqueo de rampa/cebra/paradero quitan un
   carril o cierran el paso del peatón de forma inmediata (riesgo alto), mientras
   que la invasión de andén, siendo grave, suele dejar un paso parcial → peso 2.
-- **Tipo de vía** — `arterial: 3`, `secundaria: 1`.
+- **Tipo de vía** — `arterial: 2`, `secundaria: 1`.
   *Justificación:* una obstrucción en vía arterial afecta a muchos más vehículos
-  y rutas que en una secundaria.
-- **Franja horaria** — `pico: 3`, `valle: 1`.
-  *Justificación:* el mismo incidente en hora pico genera mucha más congestión.
+  y rutas que en una secundaria; la diferencia se limita a un punto para que la
+  ubicación no domine sobre el tipo de incidente.
+- **Franja horaria** — `pico: 1`, `valle: 0`.
+  *Justificación:* la hora pico aumenta la prioridad en un punto sin inflar por
+  sí sola el nivel de criticidad.
 - **Horas pico** — `06:30–08:30`, `11:30–14:00`, `17:00–19:30`.
   *Justificación:* entrada laboral/escolar, almuerzo y salida; confirmar con los
   dos recorridos de campo.
-- **Niveles** — `Bajo [0–4]`, `Medio [5–6]`, `Alto [7–9]`.
-  *Justificación:* el puntaje mínimo posible es 2+1+1 = 4 y el máximo 3+3+3 = 9;
-  los rangos reparten ese espectro en tres bandas legibles.
+- **Niveles** — `Bajo [0–3]`, `Medio [4–5]`, `Alto [6–7]`.
+  *Justificación:* el puntaje máximo posible es 3+2+1 = 6; los rangos permiten
+  distinguir los incidentes en vías arteriales de los demás casos.
 
 > ℹ️ **Nota:** el `actor` (vehículo particular, moto, carga, mobiliario) **no**
 > suma al puntaje; solo se usa para los **filtros** y para las **recomendaciones**
@@ -138,8 +140,8 @@ recomendación y se vea un Top 5 claro. Puntajes calculados a mano con
    `resumen.js`.
 
 ### Pruebas rápidas sugeridas (para la sustentación)
-- **RF-02:** recalcular a mano MP-001 (`2+3+3=8/Alto`) y MP-012
-  (`3+1+3=7/Alto`, secundaria en pico) y comparar con el sistema.
+- **RF-02:** recalcular a mano MP-001 (`3+1+1=5/Medio`) y MP-007
+  (`3+2+1=6/Alto`, arterial en hora pico) y comparar con el sistema.
 - **RF-04:** filtrar `categoria=invasion_anden` + `franja=valle` y contar a mano.
 - **RF-05:** subir en `criterios.json` el peso de `invasion_anden` de 2 a 4 y
   mostrar cómo CR33-C21-C22 (Los Alcázares) sube en el ranking (demuestra que las

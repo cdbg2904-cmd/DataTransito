@@ -59,7 +59,7 @@ function obtenerFranja(fechaHora, horasPico) {
  * SALIDA : "arterial", "secundaria" o null si la cuadra no está catalogada.
  */
 function obtenerTipoVia(idCuadra, vias) {
-  const via = vias.find((v) => v.id === idCuadra);
+  const via = vias.find((v) => (v.id ?? v.id_via) === idCuadra);
   return via ? via.tipo_via : null;
 }
 
@@ -97,7 +97,7 @@ function calcularCriticidad(reporte, criterios, vias) {
   const pesoCategoria = criterios.categoria[reporte.categoria] ?? 0;
 
   // 2) Componente VÍA: se deduce buscando la cuadra en vias.json.
-  const tipoVia = obtenerTipoVia(reporte.cuadra, vias);
+  const tipoVia = obtenerTipoVia(reporte.cuadra ?? reporte.id_via, vias);
   const pesoVia = tipoVia ? (criterios.via[tipoVia] ?? 0) : 0;
 
   // 3) Componente FRANJA: se deduce de la hora del reporte.

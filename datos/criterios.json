@@ -5,12 +5,12 @@
     "invasion_anden": 2
   },
   "via": {
-    "arterial": 3,
+    "arterial": 2,
     "secundaria": 1
   },
   "franja": {
-    "pico": 3,
-    "valle": 1
+    "pico": 1,
+    "valle": 0
   },
   "horas_pico": [
     "06:30-08:30",
@@ -18,8 +18,8 @@
     "17:00-19:30"
   ],
   "niveles": {
-    "Bajo": [0, 4],
-    "Medio": [5, 6],
-    "Alto": [7, 9]
+    "Bajo": [0, 3],
+    "Medio": [4, 5],
+    "Alto": [6, 7]
   }
 }

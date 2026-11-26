@@ -9,7 +9,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-001.jpg",
+    "foto": "fotos/MP-01.jpg",
     "observacion": "Vehículo particular estacionado obstruyendo carril en Cl. 29I."
   },
   {
@@ -22,7 +22,7 @@
     "categoria": "invasion_anden",
     "actor": "vehiculo_particular",
     "puntaje": 4,
-    "foto": "datos/fotos/MP-002.jpg",
+    "foto": "fotos/MP-02.jpg",
     "observacion": "Camioneta blanca subida parcialmente sobre el andén residencial."
   },
   {
@@ -35,7 +35,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_carga",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-003.jpg",
+    "foto": "fotos/MP-03.jpg",
     "observacion": "Furgón escolar y fila de vehículos detenidos reduciendo el paso vehicular."
   },
   {
@@ -48,7 +48,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-004.jpg",
+    "foto": "fotos/MP-04.jpg",
     "observacion": "Fila continua de vehículos estacionados sobre calzada frente al parque en sector de Santa Marta."
   },
   {
@@ -61,7 +61,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-005.jpg",
+    "foto": "fotos/MP-05.jpg",
     "observacion": "Camioneta negra y motocicleta obstruyendo carril de circulación."
   },
   {
@@ -74,7 +74,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_carga",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-006.jpg",
+    "foto": "fotos/MP-06.jpg",
     "observacion": "Vehículo tipo van estacionado sobre la calzada bloqueando el flujo."
   },
   {
@@ -87,7 +87,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-007.jpg",
+    "foto": "fotos/MP-07.jpg",
     "observacion": "Automóvil negro estacionado junto a bolardos viales."
   },
   {
@@ -100,7 +100,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-008.jpg",
+    "foto": "fotos/MP-08.jpg",
     "observacion": "Vehículo estacionado frente a comercio obligando a desviar el tráfico."
   },
   {
@@ -113,7 +113,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-009.jpg",
+    "foto": "fotos/MP-09.jpg",
     "observacion": "Automóvil blanco estacionado sobre la vía en intersección."
   },
   {
@@ -126,7 +126,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-010.jpg",
+    "foto": "fotos/MP-10.jpg",
     "observacion": "Vehículo estacionado directamente bajo señal de prohibido parquear."
   },
   {
@@ -139,7 +139,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-011.jpg",
+    "foto": "fotos/MP-11.jpg",
     "observacion": "Camioneta platón estacionada frente a señal de prohibido parquear."
   },
   {
@@ -152,7 +152,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-012.jpg",
+    "foto": "fotos/MP-12.jpg",
     "observacion": "Reincidencia en franja mediodía frente a señal de prohibido parquear."
   },
   {
@@ -165,7 +165,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-013.jpg",
+    "foto": "fotos/MP-13.jpg",
     "observacion": "Fila de camionetas estacionadas frente a locales comerciales."
   },
   {
@@ -178,7 +178,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-014.jpg",
+    "foto": "fotos/MP-14.jpg",
     "observacion": "Camioneta blanca estacionada junto a señal de prohibido parquear."
   },
   {
@@ -191,7 +191,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-015.jpg",
+    "foto": "fotos/MP-15.jpg",
     "observacion": "Automóvil blanco estacionado junto a bolardo plástico."
   },
   {
@@ -204,7 +204,7 @@
     "categoria": "doble_fila",
     "actor": "motocicleta",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-016.jpg",
+    "foto": "fotos/MP-16.jpg",
     "observacion": "Motocicleta detenida en segundo carril junto a vehículo estacionado."
   },
   {
@@ -217,7 +217,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-017.jpg",
+    "foto": "fotos/MP-17.jpg",
     "observacion": "Tres vehículos estacionados en fila bloqueando costado de la vía."
   },
   {
@@ -230,7 +230,7 @@
     "categoria": "bloqueo_rampa_cebra_paradero",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-018.jpg",
+    "foto": "fotos/MP-18.jpg",
     "observacion": "Vehículos estacionados invadiendo el borde de la ciclorruta demarcada."
   },
   {
@@ -243,7 +243,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_carga",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-019.jpg",
+    "foto": "fotos/MP-19.jpg",
     "observacion": "Furgón blanco y fila de automóviles estacionados frente al parque."
   },
   {
@@ -256,7 +256,7 @@
     "categoria": "doble_fila",
     "actor": "vehiculo_particular",
     "puntaje": 5,
-    "foto": "datos/fotos/MP-020.jpg",
+    "foto": "fotos/MP-20.jpg",
     "observacion": "Automóvil rojo estacionado en vía de alto flujo comercial."
   },
   {
@@ -269,7 +269,7 @@
     "categoria": "invasion_anden",
     "actor": "mobiliario_comercial",
     "puntaje": 4,
-    "foto": "datos/fotos/MP-021.jpg",
+    "foto": "fotos/MP-21.jpg",
     "observacion": "Vitrina de comidas y canecas ocupando el espacio peatonal del andén."
   },
   {
@@ -282,7 +282,7 @@
     "categoria": "invasion_anden",
     "actor": "motocicleta",
     "puntaje": 4,
-    "foto": "datos/fotos/MP-022.jpg",
+    "foto": "fotos/MP-22.jpg",
     "observacion": "Dos motocicletas estacionadas sobre el andén bloqueando el paso peatonal."
   },
   {
@@ -295,7 +295,7 @@
     "categoria": "doble_fila",
     "actor": "motocicleta",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-023.jpg",
+    "foto": "fotos/MP-23.jpg",
     "observacion": "Fila de motocicletas estacionadas en diagonal ocupando carril vehicular."
   },
   {
@@ -308,7 +308,7 @@
     "categoria": "doble_fila",
     "actor": "motocicleta",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-024.jpg",
+    "foto": "fotos/MP-24.jpg",
     "observacion": "Múltiples motocicletas estacionadas sobre el borde de calzada."
   },
   {
@@ -321,7 +321,7 @@
     "categoria": "doble_fila",
     "actor": "motocicleta",
     "puntaje": 6,
-    "foto": "datos/fotos/MP-025.jpg",
+    "foto": "fotos/MP-25.jpg",
     "observacion": "Congestión por motos estacionadas en batería frente a Torres de Villa Mónica."
   }
 ]
