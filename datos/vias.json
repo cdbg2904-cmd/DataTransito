@@ -1,66 +1,32 @@
 [
   {
-    "id": "CR32-C22-C23",
-    "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 22 y 23",
-    "sector": "Entrada Unimagdalena",
+    "id_via": "C29H-CR21B-CR21F",
+    "nombre": "Calle 29H (Portal Universitario / Villa Mónica)",
     "tipo_via": "arterial",
-    "lat": 11.222804,
-    "lng": -74.193227
+    "puntos_via": 2
   },
   {
-    "id": "CR32-C21-C22",
-    "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 21 y 22",
-    "sector": "Av. del Ferrocarril",
-    "tipo_via": "arterial",
-    "lat": 11.221880,
-    "lng": -74.192520
-  },
-  {
-    "id": "CR32-C23-C24",
-    "nombre": "Av. del Ferrocarril (Cra 32) entre Calles 23 y 24",
-    "sector": "Av. del Ferrocarril",
-    "tipo_via": "arterial",
-    "lat": 11.223084,
-    "lng": -74.193455
-  },
-  {
-    "id": "AVLIB-C23-C24",
-    "nombre": "Avenida del Libertador entre Calles 23 y 24",
-    "sector": "Av. del Libertador",
-    "tipo_via": "arterial",
-    "lat": 11.228540,
-    "lng": -74.174725
-  },
-  {
-    "id": "AVLIB-C24-C25",
-    "nombre": "Avenida del Libertador entre Calles 24 y 25",
-    "sector": "Av. del Libertador",
-    "tipo_via": "arterial",
-    "lat": 11.229399,
-    "lng": -74.174900
-  },
-  {
-    "id": "C22-CR31-CR32",
-    "nombre": "Calle 22 entre Carreras 31 y 32",
-    "sector": "San Pedro Alejandrino",
+    "id_via": "C29I-CR21-CR21D",
+    "nombre": "Calle 29I (Sector Parque Villa Marbella)",
     "tipo_via": "secundaria",
-    "lat": 11.237942,
-    "lng": -74.175623
+    "puntos_via": 1
   },
   {
-    "id": "C22-CR30-CR31",
-    "nombre": "Calle 22 entre Carreras 30 y 31",
-    "sector": "San Pedro Alejandrino",
+    "id_via": "C29L3-CR21A-CR21D",
+    "nombre": "Calle 29L3 (Zona Comercial Unimagdalena)",
     "tipo_via": "secundaria",
-    "lat": 11.237942,
-    "lng": -74.175623
+    "puntos_via": 1
   },
   {
-    "id": "CR33-C21-C22",
-    "nombre": "Carrera 33 entre Calles 21 y 22",
-    "sector": "Los Alcázares",
+    "id_via": "CR21C-C29G-C29I",
+    "nombre": "Carrera 21C (Costado Parque Villa Marbella)",
     "tipo_via": "secundaria",
-    "lat": 11.220175,
-    "lng": -74.182027
+    "puntos_via": 1
+  },
+  {
+    "id_via": "CR21D1-C29K",
+    "nombre": "Carrera 21D1 con Calle 29K",
+    "tipo_via": "secundaria",
+    "puntos_via": 1
   }
 ]
