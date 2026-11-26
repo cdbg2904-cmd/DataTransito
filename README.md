@@ -15,7 +15,7 @@ El sistema calcula automáticamente un **índice de criticidad** basado en regla
 
 ### 🔗 Enlaces del Proyecto
 * **Prototipo en vivo (GitHub Pages):** `https://github.com/cdbg2904-cmd/DataTransito`
-* **Video de contingencia (Demostración):** `[Enlace a Google Drive / YouTube]`
+* **Video de contingencia (Demostración):** `https://youtu.be/5FiHnMdtYhA`
 
 ---
 
