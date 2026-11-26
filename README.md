@@ -33,6 +33,7 @@ El sistema calcula automáticamente un **índice de criticidad** basado en regla
 ## ⚙️ Funcionalidades Principales
 
 * **Captura Rápida (< 30 segundos):** Registro georreferenciado desde el celular (GPS o selección manual en mapa) con compresión automática de imagen a máximo `800px` de ancho.
+* **Reporte ciudadano rápido:** Formulario breve para elegir incidente, cuadra y actor vial, con foto de evidencia obligatoria comprimida en el navegador (máximo 800 px y 500 KB). El reporte se agrega al mapa y al resumen; en este prototipo queda guardado en el `localStorage` del navegador y no se comparte con otros dispositivos.
 * **Cálculo Automático de Criticidad:** Evaluación transparente basada en tres variables (`categoría`, `tipo de vía` y `franja horaria`) parametrizadas en `datos/criterios.json`, clasificando cada reporte en **Bajo**, **Medio** o **Alto**.
 * **Mapa de Calor e Individual:** Visualización geoespacial con *OpenStreetMap* y `Leaflet.heat` ponderada por criticidad, con opción para alternar hacia puntos individuales con evidencia fotográfica anonimizada.
 * **Filtros Dinámicos:** Filtrado en tiempo real sin recargar la página por sector/cuadra, franja horaria (pico/valle), categoría de obstrucción y actor vial.
