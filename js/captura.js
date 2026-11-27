@@ -64,7 +64,42 @@ export function fusionarReportesSinDuplicados(actuales, entrantes) {
 /**
  * Comprime una imagen usando <canvas> a un máximo de 800 px de ancho.
  */
-export function comprimirFoto(file) {
+function crearLienzoPixelado(imagen, nivelPixelado, mascara = null) {
+  const escala = Math.min(1, 800 / imagen.width);
+  const ancho = Math.max(1, Math.round(imagen.width * escala));
+  const alto = Math.max(1, Math.round(imagen.height * escala));
+  const lienzoOriginal = document.createElement("canvas");
+  lienzoOriginal.width = ancho;
+  lienzoOriginal.height = alto;
+  const ctxOriginal = lienzoOriginal.getContext("2d");
+  if (!ctxOriginal) throw new Error("No se pudo iniciar canvas para editar la foto.");
+  ctxOriginal.drawImage(imagen, 0, 0, ancho, alto);
+  if (!mascara) return lienzoOriginal;
+
+  const tamanoBloque = Math.max(1, Number(nivelPixelado) || 1);
+  if (tamanoBloque === 1) return lienzoOriginal;
+
+  const lienzoPixelado = document.createElement("canvas");
+  lienzoPixelado.width = ancho;
+  lienzoPixelado.height = alto;
+  const ctxPixelado = lienzoPixelado.getContext("2d");
+  if (!ctxPixelado) throw new Error("No se pudo iniciar canvas para pixelar la foto.");
+  const miniatura = document.createElement("canvas");
+  miniatura.width = Math.max(1, Math.ceil(ancho / tamanoBloque));
+  miniatura.height = Math.max(1, Math.ceil(alto / tamanoBloque));
+  const ctxMiniatura = miniatura.getContext("2d");
+  if (!ctxMiniatura) throw new Error("No se pudo iniciar canvas para pixelar la foto.");
+  ctxMiniatura.drawImage(imagen, 0, 0, miniatura.width, miniatura.height);
+  ctxPixelado.imageSmoothingEnabled = false;
+  ctxPixelado.drawImage(miniatura, 0, 0, miniatura.width, miniatura.height, 0, 0, ancho, alto);
+
+  ctxPixelado.globalCompositeOperation = "destination-in";
+  ctxPixelado.drawImage(mascara, 0, 0, ancho, alto);
+  ctxOriginal.drawImage(lienzoPixelado, 0, 0);
+  return lienzoOriginal;
+}
+
+export function comprimirFoto(file, nivelPixelado = 14, mascaraPixelado = null) {
   if (!file || !file.size) return Promise.resolve("");
   if (!file.type.startsWith("image/")) {
     return Promise.reject(new Error("El archivo adjunto debe ser una imagen."));
@@ -75,9 +110,9 @@ export function comprimirFoto(file) {
 
   return createImageBitmap(file).then(async (imagen) => {
     try {
-      const escala = Math.min(1, 800 / imagen.width);
-      let ancho = Math.max(1, Math.round(imagen.width * escala));
-      let alto = Math.max(1, Math.round(imagen.height * escala));
+      const lienzoEditado = crearLienzoPixelado(imagen, nivelPixelado, mascaraPixelado);
+      let ancho = lienzoEditado.width;
+      let alto = lienzoEditado.height;
       const lienzo = document.createElement("canvas");
       const ctx = lienzo.getContext("2d");
       if (!ctx) throw new Error("No se pudo iniciar canvas para comprimir la foto.");
@@ -85,7 +120,7 @@ export function comprimirFoto(file) {
       for (let intento = 0; intento < 6; intento += 1) {
         lienzo.width = ancho;
         lienzo.height = alto;
-        ctx.drawImage(imagen, 0, 0, ancho, alto);
+        ctx.drawImage(lienzoEditado, 0, 0, ancho, alto);
 
         const calidad = Math.max(0.42, 0.78 - intento * 0.08);
         const blob = await new Promise((resolve) => lienzo.toBlob(resolve, "image/jpeg", calidad));
@@ -143,6 +178,13 @@ export function inicializarCaptura({ onReporteGuardado }) {
   const previewBox = document.getElementById("preview-foto-box");
   const previewImg = document.getElementById("preview-foto-img");
   const btnQuitarFoto = document.getElementById("btn-quitar-foto");
+  const editorFoto = document.getElementById("editor-foto");
+  const nivelPixelado = document.getElementById("nivel-pixelado");
+  const valorPixelado = document.getElementById("valor-pixelado");
+  const tamanoPincel = document.getElementById("tamano-pincel");
+  const valorPincel = document.getElementById("valor-pincel");
+  const btnLimpiarPixelado = document.getElementById("btn-limpiar-pixelado");
+  const canvasEditor = document.getElementById("canvas-editor-foto");
   const btnEnviar = document.getElementById("btn-enviar-reporte");
   const estadoFormulario = document.getElementById("estado-formulario");
   const resultadoBox = document.getElementById("resultado-criticidad-captura");
@@ -151,6 +193,73 @@ export function inicializarCaptura({ onReporteGuardado }) {
   let criterios = null;
   let obtenerExistentes = () => [];
   let ubicacionMarcada = null; // { lat, lng }
+  let imagenSeleccionada = null;
+  let mascaraPixelado = null;
+  let hayZonasPixeladas = false;
+  let dibujandoPixelado = false;
+
+  function dibujarVistaPrevia() {
+    if (!imagenSeleccionada) return;
+    const lienzoEditado = crearLienzoPixelado(
+      imagenSeleccionada,
+      nivelPixelado.value,
+      hayZonasPixeladas ? mascaraPixelado : null
+    );
+    canvasEditor.width = lienzoEditado.width;
+    canvasEditor.height = lienzoEditado.height;
+    const ctx = canvasEditor.getContext("2d");
+    if (!ctx) throw new Error("No se pudo mostrar la vista previa de la foto.");
+    ctx.drawImage(lienzoEditado, 0, 0);
+    previewImg.src = lienzoEditado.toDataURL("image/jpeg", 0.84);
+    valorPixelado.textContent = `${nivelPixelado.value} px`;
+  }
+
+  function obtenerPuntoPincel(evento) {
+    const limites = canvasEditor.getBoundingClientRect();
+    return {
+      x: (evento.clientX - limites.left) * canvasEditor.width / limites.width,
+      y: (evento.clientY - limites.top) * canvasEditor.height / limites.height
+    };
+  }
+
+  function pintarZonaPixelada(evento, iniciar) {
+    if (!imagenSeleccionada || !mascaraPixelado) return;
+    const ctx = mascaraPixelado.getContext("2d");
+    if (!ctx) throw new Error("No se pudo iniciar el pincel de pixelado.");
+    const punto = obtenerPuntoPincel(evento);
+    const limites = canvasEditor.getBoundingClientRect();
+    const factorEscala = canvasEditor.width / limites.width;
+    ctx.strokeStyle = "#fff";
+    ctx.fillStyle = "#fff";
+    ctx.lineWidth = Number(tamanoPincel.value) * factorEscala;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    if (iniciar) {
+      ctx.beginPath();
+      ctx.arc(punto.x, punto.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(punto.x, punto.y);
+    } else {
+      ctx.lineTo(punto.x, punto.y);
+      ctx.stroke();
+    }
+    hayZonasPixeladas = true;
+    dibujarVistaPrevia();
+  }
+
+  canvasEditor.addEventListener("pointerdown", (evento) => {
+    if (!imagenSeleccionada) return;
+    evento.preventDefault();
+    dibujandoPixelado = true;
+    canvasEditor.setPointerCapture(evento.pointerId);
+    pintarZonaPixelada(evento, true);
+  });
+  canvasEditor.addEventListener("pointermove", (evento) => {
+    if (dibujandoPixelado) pintarZonaPixelada(evento, false);
+  });
+  canvasEditor.addEventListener("pointerup", () => { dibujandoPixelado = false; });
+  canvasEditor.addEventListener("pointercancel", () => { dibujandoPixelado = false; });
 
   // Mini-mapa para marcar el punto exacto con un toque
   const miniMapa = L.map("mapa-captura", { zoomControl: true }).setView(CENTRO_SANTA_MARTA, 14);
@@ -220,21 +329,64 @@ export function inicializarCaptura({ onReporteGuardado }) {
   });
 
   // Vista previa de foto
-  inputFoto.addEventListener("change", () => {
+  inputFoto.addEventListener("change", async () => {
     const file = inputFoto.files?.[0];
     if (!file) {
       previewBox.classList.add("hidden");
+      editorFoto.classList.add("hidden");
+      if (imagenSeleccionada) imagenSeleccionada.close();
+      imagenSeleccionada = null;
       return;
     }
-    const url = URL.createObjectURL(file);
-    previewImg.src = url;
-    previewBox.classList.remove("hidden");
+    try {
+      if (!file.type.startsWith("image/")) throw new Error("El archivo adjunto debe ser una imagen.");
+      if (file.size > 10 * 1024 * 1024) throw new Error("La foto supera los 10 MB antes de comprimir.");
+      if (imagenSeleccionada) imagenSeleccionada.close();
+      imagenSeleccionada = await createImageBitmap(file);
+      nivelPixelado.value = "14";
+      mascaraPixelado = document.createElement("canvas");
+      mascaraPixelado.width = Math.max(1, Math.round(imagenSeleccionada.width * Math.min(1, 800 / imagenSeleccionada.width)));
+      mascaraPixelado.height = Math.max(1, Math.round(imagenSeleccionada.height * Math.min(1, 800 / imagenSeleccionada.width)));
+      hayZonasPixeladas = false;
+      dibujarVistaPrevia();
+      previewBox.classList.remove("hidden");
+      editorFoto.classList.remove("hidden");
+    } catch (error) {
+      inputFoto.value = "";
+      estadoFormulario.textContent = `Error: ${error.message}`;
+      editorFoto.classList.add("hidden");
+      previewBox.classList.add("hidden");
+    }
+  });
+
+  nivelPixelado.addEventListener("input", dibujarVistaPrevia);
+  nivelPixelado.addEventListener("input", () => {
+    valorPixelado.textContent = `${nivelPixelado.value} px`;
+  });
+  tamanoPincel.addEventListener("input", () => {
+    valorPincel.textContent = `${tamanoPincel.value} px`;
+  });
+
+  btnLimpiarPixelado.addEventListener("click", () => {
+    if (!mascaraPixelado) return;
+    const ctx = mascaraPixelado.getContext("2d");
+    if (!ctx) throw new Error("No se pudo limpiar las marcas de pixelado.");
+    ctx.clearRect(0, 0, mascaraPixelado.width, mascaraPixelado.height);
+    hayZonasPixeladas = false;
+    dibujarVistaPrevia();
   });
 
   btnQuitarFoto.addEventListener("click", () => {
     inputFoto.value = "";
     previewImg.src = "";
     previewBox.classList.add("hidden");
+    editorFoto.classList.add("hidden");
+    if (imagenSeleccionada) imagenSeleccionada.close();
+    imagenSeleccionada = null;
+    mascaraPixelado = null;
+    hayZonasPixeladas = false;
+    nivelPixelado.value = "14";
+    valorPixelado.textContent = "14 px";
   });
 
   formulario.addEventListener("submit", async (ev) => {
@@ -279,10 +431,12 @@ export function inicializarCaptura({ onReporteGuardado }) {
     try {
       const archivoFoto = inputFoto.files?.[0];
       estadoFormulario.textContent = archivoFoto
-        ? "Comprimiendo foto y guardando..."
+        ? "Aplicando edición y guardando foto..."
         : "Calculando criticidad y guardando...";
 
-      const fotoBase64 = archivoFoto ? await comprimirFoto(archivoFoto) : "";
+      const fotoBase64 = archivoFoto
+        ? await comprimirFoto(archivoFoto, nivelPixelado.value, hayZonasPixeladas ? mascaraPixelado : null)
+        : "";
 
       const coord = ubicacionMarcada || { lat: via.lat, lng: via.lng };
       if (!Number.isFinite(coord.lat) || !Number.isFinite(coord.lng)) {
@@ -320,6 +474,13 @@ export function inicializarCaptura({ onReporteGuardado }) {
       formulario.reset();
       previewImg.src = "";
       previewBox.classList.add("hidden");
+      editorFoto.classList.add("hidden");
+      if (imagenSeleccionada) imagenSeleccionada.close();
+      imagenSeleccionada = null;
+      mascaraPixelado = null;
+      hayZonasPixeladas = false;
+      valorPixelado.textContent = "14 px";
+      valorPincel.textContent = "48 px";
       ubicacionMarcada = null;
       estadoUbicacion.textContent = "Toca el mapa o elige una cuadra";
     } catch (err) {

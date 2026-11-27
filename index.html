@@ -32,6 +32,10 @@
         <span>TABLERO OPERATIVO</span>
       </button>
     </nav>
+    <button id="btn-tema" class="theme-button" type="button" aria-label="Activar modo oscuro">
+      <span aria-hidden="true">☾</span>
+      <span id="texto-tema">Modo oscuro</span>
+    </button>
   </header>
 
   <div class="app-container">
@@ -106,6 +110,18 @@
               <img id="preview-foto-img" alt="Vista previa">
               <button id="btn-quitar-foto" type="button" class="remove-photo-x" title="Quitar foto">✕</button>
             </div>
+          </div>
+          <div id="editor-foto" class="photo-editor hidden">
+            <label for="nivel-pixelado">
+              Tamaño del pixel: <output id="valor-pixelado" for="nivel-pixelado">14 px</output>
+            </label>
+            <input id="nivel-pixelado" type="range" min="4" max="28" value="14" aria-label="Tamaño de los pixeles">
+            <label for="tamano-pincel">Tamaño del pincel: <output id="valor-pincel" for="tamano-pincel">48 px</output></label>
+            <input id="tamano-pincel" type="range" min="12" max="120" value="48" aria-label="Tamaño del pincel para pixelar">
+            <p>Arrastra sobre la foto para pixelar solo esas zonas.</p>
+            <canvas id="canvas-editor-foto" aria-label="Vista previa de la foto editada"></canvas>
+            <button id="btn-limpiar-pixelado" class="editor-clear-button" type="button">Quitar marcas de pixelado</button>
+            <small>Las zonas marcadas se aplicarán a la foto guardada en el reporte.</small>
           </div>
           <small class="photo-note">Sin placas ni rostros · máx. 800 px.</small>
         </div>
@@ -280,8 +296,56 @@
           </section>
         </aside>
       </div>
+
+      <section id="seccion-estadisticas" class="content-panel statistics-panel no-print" aria-labelledby="titulo-estadisticas">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Análisis de reportes filtrados</span>
+            <h2 id="titulo-estadisticas">Estadísticas de incidentes</h2>
+          </div>
+          <span id="total-estadisticas" class="statistics-total">0 reportes</span>
+        </div>
+        <div class="statistics-grid">
+          <article class="chart-card">
+            <h3>Incidentes por tipo</h3>
+            <div id="grafica-categorias" class="horizontal-chart" role="img" aria-label="Cantidad de incidentes por tipo"></div>
+          </article>
+          <article class="chart-card">
+            <h3>Franja horaria</h3>
+            <div id="grafica-franjas" class="horizontal-chart" role="img" aria-label="Cantidad de incidentes por franja horaria"></div>
+          </article>
+          <article class="chart-card chart-card-wide">
+            <h3>Incidentes por hora del día</h3>
+            <div id="grafica-horas" class="hour-chart" role="img" aria-label="Cantidad de incidentes por hora"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="content-panel gallery-panel no-print" aria-labelledby="titulo-galeria">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Evidencia fotográfica</span>
+            <h2 id="titulo-galeria">Imágenes de reportes individuales</h2>
+          </div>
+          <span id="total-fotos" class="statistics-total">0 fotos</span>
+        </div>
+        <div id="galeria-reportes" class="report-gallery">
+          <p class="muted-empty">Cargando reportes...</p>
+        </div>
+      </section>
     </div>
   </div>
+
+  <dialog id="visor-foto" class="photo-dialog" aria-labelledby="visor-titulo">
+    <div class="photo-dialog-header">
+      <div>
+        <h2 id="visor-titulo">Foto del reporte</h2>
+        <p id="visor-detalle"></p>
+      </div>
+      <button id="btn-cerrar-visor" class="dialog-close" type="button" aria-label="Cerrar visor">✕</button>
+    </div>
+    <img id="visor-imagen" alt="Evidencia ampliada del reporte">
+  </dialog>
 
   <!-- Librerías y módulos del equipo -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -334,6 +398,13 @@
     const estadoImportacion = document.getElementById("estado-importacion");
     const fechaImpresion = document.getElementById("fecha-impresion");
     const filtrosImpresion = document.getElementById("filtros-impresion");
+    const botonTema = document.getElementById("btn-tema");
+    const textoTema = document.getElementById("texto-tema");
+    const graficaCategorias = document.getElementById("grafica-categorias");
+    const graficaFranjas = document.getElementById("grafica-franjas");
+    const graficaHoras = document.getElementById("grafica-horas");
+    const galeriaReportes = document.getElementById("galeria-reportes");
+    const visorFoto = document.getElementById("visor-foto");
 
     const NOMBRES_CATEGORIA = {
       doble_fila: "Doble fila",
@@ -347,6 +418,25 @@
     let criteriosDisponibles = null;
     let totalVisibles = 0;
     let ultimaActualizacion = null;
+
+    function aplicarTema(tema) {
+      const oscuro = tema === "oscuro";
+      document.body.dataset.theme = oscuro ? "dark" : "light";
+      botonTema.setAttribute("aria-label", oscuro ? "Activar modo claro" : "Activar modo oscuro");
+      botonTema.querySelector("[aria-hidden='true']").textContent = oscuro ? "☀" : "☾";
+      textoTema.textContent = oscuro ? "Modo claro" : "Modo oscuro";
+    }
+
+    let temaGuardado = localStorage.getItem("datatransito-tema");
+    if (temaGuardado !== "oscuro" && temaGuardado !== "claro") {
+      temaGuardado = window.matchMedia("(prefers-color-scheme: dark)").matches ? "oscuro" : "claro";
+    }
+    aplicarTema(temaGuardado);
+    botonTema.addEventListener("click", () => {
+      const tema = document.body.dataset.theme === "dark" ? "claro" : "oscuro";
+      localStorage.setItem("datatransito-tema", tema);
+      aplicarTema(tema);
+    });
 
     function esMovil() {
       return window.innerWidth <= 900;
@@ -446,6 +536,94 @@
       }).join("");
     }
 
+    function renderizarBarrasHorizontal(contenedor, entradas, colorClase = "") {
+      const maximo = Math.max(1, ...entradas.map(([, cantidad]) => cantidad));
+      contenedor.innerHTML = entradas.map(([nombre, cantidad]) => `
+        <div class="horizontal-bar-item">
+          <div class="horizontal-bar-label"><span>${escaparHTML(nombre)}</span><strong>${cantidad}</strong></div>
+          <div class="horizontal-bar-track"><div class="horizontal-bar-fill ${colorClase}" style="width:${Math.round(cantidad / maximo * 100)}%"></div></div>
+        </div>
+      `).join("");
+    }
+
+    function renderizarEstadisticas(reportes) {
+      document.getElementById("total-estadisticas").textContent =
+        `${reportes.length} ${reportes.length === 1 ? "reporte" : "reportes"}`;
+      if (!reportes.length) {
+        graficaCategorias.innerHTML = `<p class="muted-empty">Sin datos para los filtros elegidos.</p>`;
+        graficaFranjas.innerHTML = `<p class="muted-empty">Sin datos para los filtros elegidos.</p>`;
+        graficaHoras.innerHTML = `<p class="muted-empty">Sin datos para los filtros elegidos.</p>`;
+        return;
+      }
+
+      const conteoCategorias = Object.keys(NOMBRES_CATEGORIA).map((categoria) => [
+        NOMBRES_CATEGORIA[categoria],
+        reportes.filter((reporte) => reporte.categoria === categoria).length
+      ]);
+      const conteoFranjas = ["pico", "valle"].map((franja) => [
+        franja === "pico" ? "Hora pico" : "Hora valle",
+        reportes.filter((reporte) =>
+          (reporte.criticidad?.desglose?.franja?.valor || reporte.franja) === franja
+        ).length
+      ]);
+      const conteoHoras = Array(24).fill(0);
+      reportes.forEach((reporte) => {
+        const hora = String(reporte.fecha_hora || "").match(/T(\d{2}):/);
+        if (hora) conteoHoras[Number(hora[1])] += 1;
+      });
+
+      renderizarBarrasHorizontal(graficaCategorias, conteoCategorias);
+      renderizarBarrasHorizontal(graficaFranjas, conteoFranjas, "franja-bar");
+      const maximoHora = Math.max(1, ...conteoHoras);
+      graficaHoras.innerHTML = conteoHoras.map((cantidad, hora) => `
+        <div class="hour-bar-item" title="${String(hora).padStart(2, "0")}:00 · ${cantidad} reportes">
+          <span class="hour-bar-count">${cantidad || ""}</span>
+          <div class="hour-bar-track"><div class="hour-bar-fill" style="height:${Math.max(cantidad ? 5 : 0, cantidad / maximoHora * 100)}%"></div></div>
+          <span class="hour-bar-label">${String(hora).padStart(2, "0")}</span>
+        </div>
+      `).join("");
+    }
+
+    function obtenerUrlFoto(foto) {
+      if (/^(data:|https?:|blob:|\/)/i.test(foto)) return foto;
+      return foto.startsWith("datos/") ? foto : `datos/${foto}`;
+    }
+
+    function renderizarGaleria(reportes) {
+      const conFoto = reportes.filter((reporte) => typeof reporte.foto === "string" && reporte.foto);
+      document.getElementById("total-fotos").textContent =
+        `${conFoto.length} ${conFoto.length === 1 ? "foto" : "fotos"}`;
+      if (!conFoto.length) {
+        galeriaReportes.innerHTML = `<p class="muted-empty">No hay reportes con foto para los filtros elegidos.</p>`;
+        return;
+      }
+      galeriaReportes.innerHTML = conFoto.map((reporte, indice) => `
+        <button class="report-photo-card" type="button" data-reporte-foto="${indice}">
+          <img src="${escaparHTML(obtenerUrlFoto(reporte.foto))}" alt="Foto del reporte ${escaparHTML(reporte.id)}" loading="lazy">
+          <span class="report-photo-info">
+            <strong>${escaparHTML(reporte.id)}</strong>
+            <span>${escaparHTML(NOMBRES_CATEGORIA[reporte.categoria] || reporte.categoria || "Incidente")}</span>
+            <small>${escaparHTML(reporte.fecha_hora || "")}</small>
+          </span>
+        </button>
+      `).join("");
+      galeriaReportes.querySelectorAll("[data-reporte-foto]").forEach((boton) => {
+        boton.addEventListener("click", () => {
+          const reporte = conFoto[Number(boton.dataset.reporteFoto)];
+          document.getElementById("visor-titulo").textContent = `Reporte ${reporte.id}`;
+          document.getElementById("visor-detalle").textContent =
+            `${NOMBRES_CATEGORIA[reporte.categoria] || reporte.categoria || "Incidente"} · ${reporte.fecha_hora || ""} · Cuadra ${reporte.cuadra || reporte.id_via || "—"}`;
+          document.getElementById("visor-imagen").src = obtenerUrlFoto(reporte.foto);
+          visorFoto.showModal();
+        });
+      });
+    }
+
+    document.getElementById("btn-cerrar-visor").addEventListener("click", () => visorFoto.close());
+    visorFoto.addEventListener("click", (evento) => {
+      if (evento.target === visorFoto) visorFoto.close();
+    });
+
     function renderizarResumenTop5(reportes) {
       if (!criteriosDisponibles || reportes.length === 0) {
         listaResumenTop5.innerHTML = `<p class="muted-empty">Sin datos para los filtros elegidos.</p>`;
@@ -495,6 +673,8 @@
 
       renderizarPorcentajeCategorias(filtrados);
       renderizarResumenTop5(filtrados);
+      renderizarEstadisticas(filtrados);
+      renderizarGaleria(filtrados);
       actualizarMetadatosImpresion(filtros);
       actualizarEstadoMapa(estaModoOffline());
     }
