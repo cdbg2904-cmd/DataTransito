@@ -545,11 +545,20 @@
         if (!resReportes.ok || !resVias.ok || !resCriterios.ok) {
           throw new Error("No se pudieron leer los JSON de datos/.");
         }
-        [reportesBase, viasDisponibles, criteriosDisponibles] = await Promise.all([
+        const [reportesCargados, viasCargadas, criteriosCargados] = await Promise.all([
           resReportes.json(),
           resVias.json(),
           resCriterios.json()
         ]);
+        reportesBase = reportesCargados.map((reporte) => ({
+          ...reporte,
+          cuadra: reporte.cuadra ?? reporte.id_via
+        }));
+        viasDisponibles = viasCargadas.map((via) => ({
+          ...via,
+          id: via.id ?? via.id_via
+        }));
+        criteriosDisponibles = criteriosCargados;
         reportesComunidad = leerReportesComunidad();
         poblarFiltros(viasDisponibles);
         captura.configurarDatos(viasDisponibles, criteriosDisponibles, () => obtenerTodosLosReportes());

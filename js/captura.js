@@ -272,6 +272,9 @@ export function inicializarCaptura({ onReporteGuardado }) {
         .slice(0, 16);
 
       const coord = ubicacionMarcada || { lat: via.lat, lng: via.lng };
+      if (!Number.isFinite(coord.lat) || !Number.isFinite(coord.lng)) {
+        throw new Error("La cuadra seleccionada no tiene coordenadas válidas. Marca el punto en el mapa e inténtalo de nuevo.");
+      }
 
       const reporte = {
         id: crearIdReporte(obtenerExistentes()),
