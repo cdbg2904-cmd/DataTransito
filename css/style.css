@@ -176,6 +176,26 @@ body[data-theme="dark"] {
 }
 .report-panel-head h2 { margin: 3px 0 0; font-size: 19px; letter-spacing: -.02em; }
 
+.criticality-help {
+  margin: -4px 0 14px;
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--background);
+}
+.criticality-help summary {
+  color: var(--blue-dark);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.criticality-help p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .connection-badge {
   display: inline-flex;
   align-items: center;
@@ -206,6 +226,12 @@ body[data-theme="dark"] {
   gap: 6px;
   font-size: 12px;
   font-weight: 700;
+}
+.field-help {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 .label-with-action {
@@ -273,32 +299,62 @@ body[data-theme="dark"] {
   border-radius: 6px;
   border: 1px solid var(--border);
 }
-.photo-editor {
-  display: grid;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 9px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
+.edit-photo-button {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
   background: var(--surface);
+  color: var(--blue-dark);
+  font: 700 11px "Inter", sans-serif;
+  cursor: pointer;
 }
-.photo-editor label { display: flex; justify-content: space-between; font-size: 11px; }
-.photo-editor input { width: 100%; accent-color: var(--blue); }
-.photo-editor canvas {
+.edit-photo-button:hover { background: rgba(24, 130, 194, .1); }
+.photo-editor-dialog {
+  width: min(940px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  padding: 20px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, .35);
+}
+.photo-editor-dialog::backdrop { background: rgba(4, 14, 24, .78); }
+.photo-editor-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.photo-editor-heading h2 { margin: 3px 0 0; font-size: 20px; }
+.photo-editor-heading p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+.photo-editor-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.photo-editor-controls label { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; font-size: 12px; font-weight: 700; }
+.photo-editor-controls output { color: var(--blue-dark); }
+.photo-editor-controls input { grid-column: 1 / -1; width: 100%; accent-color: var(--blue); }
+.photo-editor-canvas-wrap {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--background);
+}
+.photo-editor-dialog canvas {
   display: block;
   width: auto;
   max-width: 100%;
-  max-height: 240px;
+  max-height: 55vh;
   object-fit: contain;
   border-radius: 6px;
   background: #e9eff4;
   cursor: crosshair;
   touch-action: none;
 }
-.photo-editor p { margin: 0; color: var(--muted); font-size: 11px; }
-.photo-editor small { color: var(--muted); font-size: 10px; }
+.photo-editor-actions { display: flex; justify-content: space-between; gap: 10px; }
 .editor-clear-button {
   min-height: 34px;
+  padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 7px;
   background: var(--background);
@@ -307,6 +363,18 @@ body[data-theme="dark"] {
   cursor: pointer;
 }
 .editor-clear-button:hover { border-color: var(--blue); }
+.editor-apply-button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green-btn);
+  color: #fff;
+  font: 700 12px "Inter", sans-serif;
+  cursor: pointer;
+}
+.editor-apply-button:hover { background: var(--green-hover); }
+.photo-editor-note { margin: 0; color: var(--muted); font-size: 11px; }
 .remove-photo-x {
   width: 24px;
   height: 24px;
@@ -417,6 +485,60 @@ body[data-theme="dark"] {
   z-index: 1;
 }
 
+.map-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 9px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  background: var(--background);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.dot {
+  display: inline-block;
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+.dot.low { background: var(--green); }
+.dot.medium { background: var(--orange); }
+.dot.high { background: var(--red); }
+#estado-mapa {
+  flex: none;
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: var(--background);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: right;
+}
+
 /* Barra compacta de filtros en 1 sola fila encima del mapa (sin tapar puntos) */
 .floating-filters {
   display: flex;
@@ -522,7 +644,6 @@ body[data-theme="dark"] {
 }
 .top5-title { font-size: 12px; font-weight: 700; color: var(--navy); line-height: 1.25; }
 .top5-badge {
-  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -530,6 +651,8 @@ body[data-theme="dark"] {
   font-weight: 700;
   color: #b42323;
 }
+.top5-count { margin-top: 4px; font-size: 10px; color: var(--muted); }
+.score-explanation { margin: -4px 0 8px; color: var(--muted); font-size: 10px; line-height: 1.4; }
 .top5-rec { margin-top: 4px; font-size: 11px; font-weight: 700; color: var(--blue-dark); }
 .top5-rule { margin-top: 2px; font-size: 10px; color: var(--muted); }
 .muted-empty { margin: 0; font-size: 12px; color: var(--muted); }
@@ -730,11 +853,16 @@ body[data-theme="dark"] .offline-button[aria-pressed="true"] {
   .floating-filters { position: static; margin: 0; border-radius: 0; border-left: 0; border-right: 0; box-shadow: none; }
   .map { height: 390px; }
   .toggle-button span { display: none; }
+  .map-footer { align-items: flex-start; flex-direction: column; gap: 8px; padding: 10px 12px; }
+  #estado-mapa { text-align: left; }
   .statistics-grid { grid-template-columns: 1fr; }
   .chart-card-wide { grid-column: auto; }
   .content-panel { padding: 15px; }
   .hour-chart { gap: 2px; }
   .hour-bar-count { font-size: 8px; }
+  .photo-editor-controls { grid-template-columns: 1fr; gap: 10px; }
+  .photo-editor-dialog { padding: 14px; }
+  .photo-editor-canvas-wrap { min-height: 140px; }
 }
 
 /* ================= VISTA DE IMPRESIÓN (RF-05) ================= */
@@ -794,3 +922,4 @@ body[data-theme="dark"] .critical-row { border-color: var(--border); }
 body[data-theme="dark"] .floating-filters,
 body[data-theme="dark"] .map-footer { background: #192633; color: var(--text); }
 body[data-theme="dark"] .cat-bar-track { background: #314252; }
+body[data-theme="dark"] .photo-editor-dialog { background: var(--surface); color: var(--text); }

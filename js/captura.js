@@ -178,7 +178,10 @@ export function inicializarCaptura({ onReporteGuardado }) {
   const previewBox = document.getElementById("preview-foto-box");
   const previewImg = document.getElementById("preview-foto-img");
   const btnQuitarFoto = document.getElementById("btn-quitar-foto");
-  const editorFoto = document.getElementById("editor-foto");
+  const btnEditarFoto = document.getElementById("btn-editar-foto");
+  const editorFoto = document.getElementById("dialogo-editor-foto");
+  const btnCerrarEditor = document.getElementById("btn-cerrar-editor");
+  const btnAplicarFoto = document.getElementById("btn-aplicar-foto");
   const nivelPixelado = document.getElementById("nivel-pixelado");
   const valorPixelado = document.getElementById("valor-pixelado");
   const tamanoPincel = document.getElementById("tamano-pincel");
@@ -260,6 +263,12 @@ export function inicializarCaptura({ onReporteGuardado }) {
   });
   canvasEditor.addEventListener("pointerup", () => { dibujandoPixelado = false; });
   canvasEditor.addEventListener("pointercancel", () => { dibujandoPixelado = false; });
+  btnEditarFoto.addEventListener("click", () => {
+    if (imagenSeleccionada && !editorFoto.open) editorFoto.showModal();
+  });
+  [btnCerrarEditor, btnAplicarFoto].forEach((boton) => {
+    boton.addEventListener("click", () => editorFoto.close());
+  });
 
   // Mini-mapa para marcar el punto exacto con un toque
   const miniMapa = L.map("mapa-captura", { zoomControl: true }).setView(CENTRO_SANTA_MARTA, 14);
@@ -333,29 +342,38 @@ export function inicializarCaptura({ onReporteGuardado }) {
     const file = inputFoto.files?.[0];
     if (!file) {
       previewBox.classList.add("hidden");
-      editorFoto.classList.add("hidden");
+      btnEditarFoto.classList.add("hidden");
       if (imagenSeleccionada) imagenSeleccionada.close();
       imagenSeleccionada = null;
+      mascaraPixelado = null;
+      hayZonasPixeladas = false;
       return;
     }
     try {
       if (!file.type.startsWith("image/")) throw new Error("El archivo adjunto debe ser una imagen.");
       if (file.size > 10 * 1024 * 1024) throw new Error("La foto supera los 10 MB antes de comprimir.");
       if (imagenSeleccionada) imagenSeleccionada.close();
+      imagenSeleccionada = null;
       imagenSeleccionada = await createImageBitmap(file);
       nivelPixelado.value = "14";
+      tamanoPincel.value = "48";
+      valorPincel.textContent = "48 px";
       mascaraPixelado = document.createElement("canvas");
       mascaraPixelado.width = Math.max(1, Math.round(imagenSeleccionada.width * Math.min(1, 800 / imagenSeleccionada.width)));
       mascaraPixelado.height = Math.max(1, Math.round(imagenSeleccionada.height * Math.min(1, 800 / imagenSeleccionada.width)));
       hayZonasPixeladas = false;
       dibujarVistaPrevia();
       previewBox.classList.remove("hidden");
-      editorFoto.classList.remove("hidden");
+      btnEditarFoto.classList.remove("hidden");
     } catch (error) {
       inputFoto.value = "";
       estadoFormulario.textContent = `Error: ${error.message}`;
-      editorFoto.classList.add("hidden");
+      btnEditarFoto.classList.add("hidden");
       previewBox.classList.add("hidden");
+      if (imagenSeleccionada) imagenSeleccionada.close();
+      imagenSeleccionada = null;
+      mascaraPixelado = null;
+      hayZonasPixeladas = false;
     }
   });
 
@@ -380,13 +398,16 @@ export function inicializarCaptura({ onReporteGuardado }) {
     inputFoto.value = "";
     previewImg.src = "";
     previewBox.classList.add("hidden");
-    editorFoto.classList.add("hidden");
+    btnEditarFoto.classList.add("hidden");
+    if (editorFoto.open) editorFoto.close();
     if (imagenSeleccionada) imagenSeleccionada.close();
     imagenSeleccionada = null;
     mascaraPixelado = null;
     hayZonasPixeladas = false;
     nivelPixelado.value = "14";
     valorPixelado.textContent = "14 px";
+    tamanoPincel.value = "48";
+    valorPincel.textContent = "48 px";
   });
 
   formulario.addEventListener("submit", async (ev) => {
@@ -474,11 +495,14 @@ export function inicializarCaptura({ onReporteGuardado }) {
       formulario.reset();
       previewImg.src = "";
       previewBox.classList.add("hidden");
-      editorFoto.classList.add("hidden");
+      btnEditarFoto.classList.add("hidden");
+      if (editorFoto.open) editorFoto.close();
       if (imagenSeleccionada) imagenSeleccionada.close();
       imagenSeleccionada = null;
       mascaraPixelado = null;
       hayZonasPixeladas = false;
+      nivelPixelado.value = "14";
+      tamanoPincel.value = "48";
       valorPixelado.textContent = "14 px";
       valorPincel.textContent = "48 px";
       ubicacionMarcada = null;

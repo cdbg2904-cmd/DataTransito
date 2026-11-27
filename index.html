@@ -54,6 +54,16 @@
         </div>
       </div>
 
+      <details class="criticality-help">
+        <summary>¿Cómo se calcula el índice de criticidad?</summary>
+        <p>
+          Cada reporte suma categoría (2–3 puntos), tipo de vía (1–2) y franja horaria
+          (pico +1; valle +0). En la configuración actual, cada incidente aporta hasta
+          6 puntos: Bajo 0–3, Medio 4–5 y Alto 6. Las horas pico son 06:30–08:30,
+          11:30–14:00 y 17:00–19:30.
+        </p>
+      </details>
+
       <form id="formulario-reporte" class="report-form-row" novalidate>
         <label class="field-group">
           <span>¿Qué ocurrió?</span>
@@ -63,6 +73,7 @@
             <option value="bloqueo_rampa_cebra_paradero">Bloqueo de rampa, cebra o paradero</option>
             <option value="invasion_anden">Invasión del andén por comercio/moto</option>
           </select>
+          <small class="field-help">Escoge el tipo que mejor describa la obstrucción observada.</small>
         </label>
 
         <div class="field-group">
@@ -80,6 +91,7 @@
           <select id="reporte-cuadra" name="cuadra" required disabled>
             <option value="">Cargando cuadras...</option>
           </select>
+          <small class="field-help">Elige la cuadra más cercana; también puedes ubicar el punto con GPS o en el mapa.</small>
         </div>
 
         <label class="field-group">
@@ -91,6 +103,7 @@
             <option value="vehiculo_carga">Vehículo de carga descargando</option>
             <option value="mobiliario_comercial">Mobiliario comercial</option>
           </select>
+          <small class="field-help">Indica el vehículo, actor o elemento que está causando la obstrucción.</small>
         </label>
 
         <div class="field-group">
@@ -110,20 +123,9 @@
               <img id="preview-foto-img" alt="Vista previa">
               <button id="btn-quitar-foto" type="button" class="remove-photo-x" title="Quitar foto">✕</button>
             </div>
+            <button id="btn-editar-foto" class="edit-photo-button hidden" type="button">Editar / pixelar</button>
           </div>
-          <div id="editor-foto" class="photo-editor hidden">
-            <label for="nivel-pixelado">
-              Tamaño del pixel: <output id="valor-pixelado" for="nivel-pixelado">14 px</output>
-            </label>
-            <input id="nivel-pixelado" type="range" min="4" max="28" value="14" aria-label="Tamaño de los pixeles">
-            <label for="tamano-pincel">Tamaño del pincel: <output id="valor-pincel" for="tamano-pincel">48 px</output></label>
-            <input id="tamano-pincel" type="range" min="12" max="120" value="48" aria-label="Tamaño del pincel para pixelar">
-            <p>Arrastra sobre la foto para pixelar solo esas zonas.</p>
-            <canvas id="canvas-editor-foto" aria-label="Vista previa de la foto editada"></canvas>
-            <button id="btn-limpiar-pixelado" class="editor-clear-button" type="button">Quitar marcas de pixelado</button>
-            <small>Las zonas marcadas se aplicarán a la foto guardada en el reporte.</small>
-          </div>
-          <small class="photo-note">Sin placas ni rostros · máx. 800 px.</small>
+          <small class="photo-note">Opcional · evita placas y rostros; puedes pixelar zonas · máx. 800 px.</small>
         </div>
 
         <button id="btn-enviar-reporte" class="submit-yellow-btn" type="submit" disabled>
@@ -273,6 +275,7 @@
             <!-- Top 5 Cuadras Críticas (RF-05) -->
             <div class="top5-section">
               <h3>Top 5 Cuadras Críticas</h3>
+              <p id="nota-puntaje-acumulado" class="score-explanation"></p>
               <div id="lista-resumen-top5" class="top5-list">
                 <p class="muted-empty">Calculando...</p>
               </div>
@@ -336,6 +339,35 @@
     </div>
   </div>
 
+  <dialog id="dialogo-editor-foto" class="photo-editor-dialog" aria-labelledby="titulo-editor-foto">
+    <div class="photo-editor-heading">
+      <div>
+        <span class="eyebrow">Edición local de evidencia</span>
+        <h2 id="titulo-editor-foto">Pixelar zonas de la foto</h2>
+        <p>Arrastra el pincel sobre las zonas que quieras proteger.</p>
+      </div>
+      <button id="btn-cerrar-editor" class="dialog-close" type="button" aria-label="Cerrar editor">✕</button>
+    </div>
+    <div class="photo-editor-controls">
+      <label for="nivel-pixelado">
+        Tamaño del pixel <output id="valor-pixelado" for="nivel-pixelado">14 px</output>
+        <input id="nivel-pixelado" type="range" min="4" max="28" value="14" aria-label="Tamaño de los pixeles">
+      </label>
+      <label for="tamano-pincel">
+        Tamaño del pincel <output id="valor-pincel" for="tamano-pincel">48 px</output>
+        <input id="tamano-pincel" type="range" min="12" max="120" value="48" aria-label="Tamaño del pincel para pixelar">
+      </label>
+    </div>
+    <div class="photo-editor-canvas-wrap">
+      <canvas id="canvas-editor-foto" aria-label="Vista previa de la foto editada"></canvas>
+    </div>
+    <div class="photo-editor-actions">
+      <button id="btn-limpiar-pixelado" class="editor-clear-button" type="button">Quitar marcas</button>
+      <button id="btn-aplicar-foto" class="editor-apply-button" type="button">Aplicar y volver al reporte</button>
+    </div>
+    <p class="photo-editor-note">Solo las zonas marcadas se pixelarán en la foto guardada.</p>
+  </dialog>
+
   <dialog id="visor-foto" class="photo-dialog" aria-labelledby="visor-titulo">
     <div class="photo-dialog-header">
       <div>
@@ -360,7 +392,8 @@
       actualizarCapasMapa,
       alternarVistaMapa,
       establecerModoOffline,
-      estaModoOffline
+      estaModoOffline,
+      obtenerUrlFoto
     } from "./js/mapa.js";
     import {
       inicializarCaptura,
@@ -392,6 +425,7 @@
 
     const desgloseCategorias = document.getElementById("desglose-categorias");
     const listaResumenTop5 = document.getElementById("lista-resumen-top5");
+    const notaPuntajeAcumulado = document.getElementById("nota-puntaje-acumulado");
     const btnImprimir = document.getElementById("btn-imprimir-resumen");
     const btnExportar = document.getElementById("btn-exportar-json");
     const inputImportar = document.getElementById("input-importar-json");
@@ -536,6 +570,14 @@
       }).join("");
     }
 
+    function obtenerPuntajeMaximoPorReporte() {
+      if (!criteriosDisponibles) return 0;
+      return ["categoria", "via", "franja"].reduce((total, componente) => {
+        const valores = Object.values(criteriosDisponibles[componente] || {}).map(Number);
+        return total + Math.max(0, ...valores);
+      }, 0);
+    }
+
     function renderizarBarrasHorizontal(contenedor, entradas, colorClase = "") {
       const maximo = Math.max(1, ...entradas.map(([, cantidad]) => cantidad));
       contenedor.innerHTML = entradas.map(([nombre, cantidad]) => `
@@ -584,11 +626,6 @@
       `).join("");
     }
 
-    function obtenerUrlFoto(foto) {
-      if (/^(data:|https?:|blob:|\/)/i.test(foto)) return foto;
-      return foto.startsWith("datos/") ? foto : `datos/${foto}`;
-    }
-
     function renderizarGaleria(reportes) {
       const conFoto = reportes.filter((reporte) => typeof reporte.foto === "string" && reporte.foto);
       document.getElementById("total-fotos").textContent =
@@ -625,6 +662,9 @@
     });
 
     function renderizarResumenTop5(reportes) {
+      const puntajeMaximo = obtenerPuntajeMaximoPorReporte();
+      notaPuntajeAcumulado.textContent =
+        `El puntaje por cuadra acumula varios reportes; cada incidente aporta hasta ${puntajeMaximo} puntos.`;
       if (!criteriosDisponibles || reportes.length === 0) {
         listaResumenTop5.innerHTML = `<p class="muted-empty">Sin datos para los filtros elegidos.</p>`;
         return;
@@ -634,8 +674,9 @@
         <article class="top5-item">
           <div class="top5-item-top">
             <span class="top5-title">${idx + 1}. ${escaparHTML(item.nombre)}</span>
-            <span class="top5-badge"><i class="dot high"></i> ${item.puntajeAcumulado} pts</span>
+            <span class="top5-badge"><i class="dot high"></i> ${item.puntajeAcumulado} pts acumulados</span>
           </div>
+          <div class="top5-count">${item.totalReportes} reportes · máximo ${puntajeMaximo} pts por reporte</div>
           <div class="top5-rec">${escaparHTML(item.recomendacion)}</div>
           <div class="top5-rule">${escaparHTML(item.regla)}</div>
         </article>

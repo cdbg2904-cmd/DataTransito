@@ -17,12 +17,12 @@ const LIMITES_MAPA_OFFLINE = [
   [11.216122, -74.201660],
   [11.243062, -74.168701]
 ];
-const ZOOM_INICIAL = 15.5;
+const ZOOM_INICIAL = 14.5;
 const ZOOM_EN_LINEA = ZOOM_INICIAL + 1;
 const ZOOM_OUT_MAXIMO_OFFLINE = 0.3;
 const ZOOM_IN_MAXIMO_OFFLINE = 2.5;
-const RADIO_CALOR = 28;
-const DIFUMINADO_CALOR = 18;
+const RADIO_CALOR = 18;
+const DIFUMINADO_CALOR = 12;
 
 function opcionesCalorSegunModo() {
   const escala = modoOffline ? 0.5 : 1;
@@ -42,6 +42,12 @@ function escaparHTML(valor) {
   })[caracter]);
 }
 
+export function obtenerUrlFoto(foto) {
+  if (typeof foto !== 'string' || !foto) return '';
+  if (/^(data:|https?:|blob:|\/)/i.test(foto)) return foto;
+  return foto.startsWith('datos/') ? foto : `datos/${foto}`;
+}
+
 function nivelMasAlto(reportes) {
   const prioridad = { Alto: 3, Medio: 2, Bajo: 1 };
   return reportes.reduce((nivelActual, reporte) => {
@@ -59,7 +65,7 @@ function crearContenidoPopup(reportes) {
       <strong>${escaparHTML(reporte.id)}</strong> — ${escaparHTML(reporte.categoria)}<br>
       Actor: ${escaparHTML(reporte.actor)}<br>
       Criticidad: ${escaparHTML(reporte.criticidad?.nivel)} (${escaparHTML(reporte.criticidad?.puntaje)} pts)
-      ${reporte.foto ? `<br><img src="${escaparHTML(reporte.foto)}" alt="Evidencia de ${escaparHTML(reporte.id)}" style="width:140px; margin-top:6px; border-radius:4px;">` : ''}
+      ${reporte.foto ? `<br><img src="${escaparHTML(obtenerUrlFoto(reporte.foto))}" alt="Evidencia de ${escaparHTML(reporte.id)}" style="width:140px; margin-top:6px; border-radius:4px;">` : ''}
     </li>
   `).join('');
 
@@ -151,11 +157,11 @@ export function actualizarCapasMapa(reportes) {
   );
 
   // 1. Preparar datos para Leaflet.heat: [lat, lng, intensidad_normalizada]
-  // Como el puntaje máximo es 9, dividimos entre 9 para que Leaflet.heat escale bien (0.0 a 1.0)
+  // El puntaje máximo actual es 6 (categoría 3 + vía 2 + franja pico 1).
   const puntosCalor = reportesConCoordenadas.map(rep => [
     rep.lat,
     rep.lng,
-    (rep.criticidad?.puntaje || 1) / 9
+    (rep.criticidad?.puntaje || 1) / 6
   ]);
 
   capaCalor = L.heatLayer(puntosCalor, {
