@@ -256,6 +256,23 @@ export function inicializarCaptura({ onReporteGuardado }) {
       return;
     }
 
+    const ahora = new Date();
+    const fechaLocal = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    const franja = window.obtenerFranja(fechaLocal, criterios.horas_pico);
+    const fechaVisible = ahora.toLocaleString("es-CO", {
+      dateStyle: "short",
+      timeStyle: "short"
+    });
+    const nombreFranja = franja === "pico" ? "hora pico" : "hora valle";
+    if (!window.confirm(
+      `Hora del reporte: ${fechaVisible}\nClasificación: ${nombreFranja}.\n¿Deseas enviar el reporte?`
+    )) {
+      estadoFormulario.textContent = "Envío cancelado. Puedes revisar el reporte antes de enviarlo.";
+      return;
+    }
+
     btnEnviar.disabled = true;
     resultadoBox.classList.add("hidden");
 
@@ -266,10 +283,6 @@ export function inicializarCaptura({ onReporteGuardado }) {
         : "Calculando criticidad y guardando...";
 
       const fotoBase64 = archivoFoto ? await comprimirFoto(archivoFoto) : "";
-      const ahora = new Date();
-      const fechaLocal = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
 
       const coord = ubicacionMarcada || { lat: via.lat, lng: via.lng };
       if (!Number.isFinite(coord.lat) || !Number.isFinite(coord.lng)) {

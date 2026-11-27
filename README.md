@@ -34,6 +34,7 @@ El sistema calcula automáticamente un **índice de criticidad** basado en regla
 
 * **Captura Rápida (< 30 segundos):** Registro georreferenciado desde el celular (GPS o selección manual en mapa) con compresión automática de imagen a máximo `800px` de ancho.
 * **Reporte ciudadano rápido:** Formulario breve para elegir incidente, cuadra y actor vial, con foto de evidencia obligatoria comprimida en el navegador (máximo 800 px y 500 KB). El reporte se agrega al mapa y al resumen; en este prototipo queda guardado en el `localStorage` del navegador y no se comparte con otros dispositivos.
+* **Confirmación de franja horaria:** Antes de guardar, se muestra la hora local del dispositivo y se pide confirmar si corresponde a hora pico o valle. Pico comprende 06:30–08:30, 11:30–14:00 y 17:00–19:30; el resto del día se clasifica como valle.
 * **Cálculo Automático de Criticidad:** Evaluación transparente basada en tres variables (`categoría`, `tipo de vía` y `franja horaria`) parametrizadas en `datos/criterios.json`, clasificando cada reporte en **Bajo**, **Medio** o **Alto**.
 * **Mapa de Calor e Individual:** Visualización geoespacial con *OpenStreetMap* y `Leaflet.heat` ponderada por criticidad, con opción para alternar hacia puntos individuales con evidencia fotográfica anonimizada.
 * **Filtros Dinámicos:** Filtrado en tiempo real sin recargar la página por sector/cuadra, franja horaria (pico/valle), categoría de obstrucción y actor vial.
@@ -52,7 +53,7 @@ El sistema calcula automáticamente un **índice de criticidad** basado en regla
 ├── resumen.js                  # Agrupación por cuadra, Top 5 y motor de reglas de recomendación
 ├── mapa.js                     # Inicialización de Leaflet, capa de calor y marcadores
 ├── datos/
-│   ├── reportes.json           # Base de datos precargada (30 registros reales de campo)
+│   ├── reportes.json           # Base de datos precargada (25 registros de muestra)
 │   ├── vias.json               # Catálogo de cuadras evaluadas y su clasificación (arterial/secundaria)
 │   ├── criterios.json          # Pesos, rangos de criticidad y definición de horas pico
 │   └── fotos/                  # Evidencia fotográfica anonimizada (sin placas ni rostros)
